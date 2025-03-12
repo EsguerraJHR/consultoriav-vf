@@ -5,22 +5,22 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 ## Características
 
 - **Interfaz de usuario intuitiva**: Aplicación web desarrollada con Streamlit
-- **Múltiples bases de conocimiento**: 
-  - Renta: Consultas sobre el Impuesto de Renta
-  - Timbre: Consultas sobre el Impuesto de Timbre
-  - Retencion: Consultas sobre Retención en la Fuente
-- **Tecnologías RAG avanzadas**:
-  - Utiliza LangChain y LangGraph para flujos de procesamiento
-  - Integración con Chroma DB y Pinecone para almacenamiento vectorial
-  - Soporte para modelos de OpenAI y Anthropic
+- **Acceso a documentos oficiales**: 
+  - Renta: Documentos sobre el Impuesto de Renta
+  - Timbre: Documentos sobre el Impuesto de Timbre
+  - Retencion: Documentos sobre Retención en la Fuente
+- **Verificación de fuentes**:
+  - Acceso directo a los documentos citados en las respuestas
+  - Organización por categorías tributarias
+  - Trazabilidad de la información jurídica
 
 ## Estructura del Proyecto
 
 - `Inicio.py`: Página principal de la aplicación Streamlit
 - `pages/`: Directorio con páginas adicionales de la aplicación
-  - `2_Renta.py`: Página para consultas sobre Impuesto de Renta
-  - `3_Timbre.py`: Página para consultas sobre Impuesto de Timbre
-  - `4_Retencion.py`: Página para consultas sobre Retención en la Fuente
+  - `2_Renta.py`: Página para acceder a documentos sobre Impuesto de Renta
+  - `3_Timbre.py`: Página para acceder a documentos sobre Impuesto de Timbre
+  - `4_Retencion.py`: Página para acceder a documentos sobre Retención en la Fuente
 - `pages_hidden/`: Directorio con páginas ocultas (no visibles en la interfaz)
   - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian (oculta)
 - `graph/`: Directorio con definiciones de grafos LangGraph
@@ -68,12 +68,12 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 
 3. Abre tu navegador en `http://localhost:8501`
 
-## Despliegue en Streamlit Cloud
+## Próximas Funcionalidades
 
-1. Crea una cuenta en [Streamlit Cloud](https://streamlit.io/cloud)
-2. Conecta tu repositorio de GitHub
-3. Configura las variables de entorno en la interfaz de Streamlit Cloud
-4. Despliega la aplicación
+- **Acceso directo a documentos**: Navegación y búsqueda en la base documental
+- **Verificación de citas**: Sistema para validar las referencias utilizadas en las respuestas
+- **Exportación de documentos**: Posibilidad de descargar los documentos citados
+- **Anotaciones**: Herramientas para que los abogados puedan agregar notas a los documentos
 
 ## Licencia
 
