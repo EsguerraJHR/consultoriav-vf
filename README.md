@@ -5,7 +5,8 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 ## Características
 
 - **Interfaz de usuario intuitiva**: Aplicación web desarrollada con Streamlit
-- **Acceso a documentos oficiales**: 
+- **Respuestas fundamentadas**: Basadas en documentos oficiales de la DIAN
+- **Biblioteca de documentos**: 
   - Renta: Documentos sobre el Impuesto de Renta
   - Timbre: Documentos sobre el Impuesto de Timbre
   - Retencion: Documentos sobre Retención en la Fuente
@@ -16,11 +17,12 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 
 ## Estructura del Proyecto
 
-- `Inicio.py`: Página principal de la aplicación Streamlit
+- `Inicio.py`: Página principal con descripción general de la aplicación
 - `pages/`: Directorio con páginas adicionales de la aplicación
-  - `2_Renta.py`: Página para acceder a documentos sobre Impuesto de Renta
-  - `3_Timbre.py`: Página para acceder a documentos sobre Impuesto de Timbre
-  - `4_Retencion.py`: Página para acceder a documentos sobre Retención en la Fuente
+  - `2_Renta.py`: Página para consultas sobre Impuesto de Renta
+  - `3_Timbre.py`: Página para consultas sobre Impuesto de Timbre
+  - `4_Retencion.py`: Página para consultas sobre Retención en la Fuente
+  - `5_Biblioteca.py`: Página para acceder a los documentos jurídicos
 - `pages_hidden/`: Directorio con páginas ocultas (no visibles en la interfaz)
   - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian (oculta)
 - `graph/`: Directorio con definiciones de grafos LangGraph
@@ -70,10 +72,10 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 
 ## Próximas Funcionalidades
 
-- **Acceso directo a documentos**: Navegación y búsqueda en la base documental
-- **Verificación de citas**: Sistema para validar las referencias utilizadas en las respuestas
-- **Exportación de documentos**: Posibilidad de descargar los documentos citados
+- **Búsqueda avanzada**: Filtros adicionales y búsqueda por contenido del documento
+- **Exportación masiva**: Posibilidad de descargar múltiples documentos a la vez
 - **Anotaciones**: Herramientas para que los abogados puedan agregar notas a los documentos
+- **Integración con respuestas**: Acceso directo a los documentos citados en cada respuesta
 
 ## Licencia
 
