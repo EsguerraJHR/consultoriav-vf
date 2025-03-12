@@ -6,9 +6,9 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 
 - **Interfaz de usuario intuitiva**: Aplicación web desarrollada con Streamlit
 - **Múltiples bases de conocimiento**: 
-  - Dian varios: Consultas sobre conceptos varios de la Dian
   - Renta: Consultas sobre el Impuesto de Renta
-  - Renta Experimental: Versión experimental con flujos avanzados
+  - Timbre: Consultas sobre el Impuesto de Timbre
+  - Retencion: Consultas sobre Retención en la Fuente
 - **Tecnologías RAG avanzadas**:
   - Utiliza LangChain y LangGraph para flujos de procesamiento
   - Integración con Chroma DB y Pinecone para almacenamiento vectorial
@@ -18,9 +18,11 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
 
 - `Inicio.py`: Página principal de la aplicación Streamlit
 - `pages/`: Directorio con páginas adicionales de la aplicación
-  - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian
   - `2_Renta.py`: Página para consultas sobre Impuesto de Renta
-  - `3_Renta_Experimental.py`: Versión experimental con flujos avanzados
+  - `3_Timbre.py`: Página para consultas sobre Impuesto de Timbre
+  - `4_Retencion.py`: Página para consultas sobre Retención en la Fuente
+- `pages_hidden/`: Directorio con páginas ocultas (no visibles en la interfaz)
+  - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian (oculta)
 - `graph/`: Directorio con definiciones de grafos LangGraph
 - `legal_docs/`: Documentos legales utilizados para entrenamiento
 - `.chroma/`: Base de datos vectorial local (Chroma)

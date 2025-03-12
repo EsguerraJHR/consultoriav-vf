@@ -36,6 +36,11 @@ TIMBRE_NAMESPACE = "timbre"
 DIANFULL_INDEX_NAME = "dianfull"
 DIANFULL_NAMESPACE = "dianfull"
 
+# Configuración específica para Retención
+RETENCION_INDEX_NAME = "retencion"
+RETENCION_NAMESPACE = "retencion"
+RETENCION_TOP_K = 8  # Valor aumentado específicamente para Retención
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -156,6 +161,12 @@ def query_dianfull(query: str, top_k: int = TOP_K):
     """
     return query_pinecone(query, index_name=DIANFULL_INDEX_NAME, namespace=DIANFULL_NAMESPACE, top_k=top_k)
 
+def query_retencion(query: str, top_k: int = RETENCION_TOP_K):
+    """
+    Consulta específica para documentos de Retención.
+    """
+    return query_pinecone(query, index_name=RETENCION_INDEX_NAME, namespace=RETENCION_NAMESPACE, top_k=top_k)
+
 class MultiRetriever:
     """
     Retriever que puede consultar diferentes fuentes según el tema.
@@ -185,6 +196,12 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de Dian Full")
                 docs = query_dianfull(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Dian Full)")
+                return docs
+            elif topic.strip() == "Retención":
+                # Usar Pinecone para consultas de Retención
+                print("MultiRetriever: Usando Pinecone para consultas de Retención")
+                docs = query_retencion(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Retención)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)

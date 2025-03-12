@@ -54,10 +54,10 @@ def verificar_coleccion(subarea=None):
         # Siempre devolver True para Timbre, ya que forzaremos el uso de Pinecone
         return True
     
-    # Caso especial para Dian Full (usa Pinecone)
-    if subarea == "Dian Full":
-        print("verificar_coleccion: Verificando Pinecone para Dian Full")
-        # Siempre devolver True para Dian Full, ya que forzaremos el uso de Pinecone
+    # Caso especial para Retencion (usa Pinecone)
+    if subarea == "Retencion":
+        print("verificar_coleccion: Verificando Pinecone para Retencion")
+        # Siempre devolver True para Retencion, ya que forzaremos el uso de Pinecone
         return True
     
     # Intentar acceder a la colección (implementación básica)
@@ -91,8 +91,8 @@ query_params = st.query_params
 default_subarea = query_params.get("subarea", ["IVA"])[0] if "subarea" in query_params else "IVA"
 
 # Verificar que la subárea exista en nuestras opciones
-if default_subarea not in ["Dian varios", "Renta", "Timbre", "Dian Full"]:
-    default_subarea = "Dian varios"
+if default_subarea not in ["Renta", "Timbre", "Retencion"]:
+    default_subarea = "Renta"
 
 # Inicializar o actualizar el estado con los valores de URL
 if "subarea_seleccionada" not in st.session_state:
@@ -102,34 +102,27 @@ if "subarea_seleccionada" not in st.session_state:
 st.title("⚖️ Asistente Jurídico Tributario")
 
 # Tabs para las subáreas
-tab1, tab2, tab3, tab4 = st.tabs(["Dian varios", "Renta", "Timbre", "Dian Full"])
+tab1, tab2, tab3 = st.tabs(["Renta", "Timbre", "Retencion"])
 
 with tab1:
-    if st.button("Seleccionar Dian varios", key="select_dian_varios", use_container_width=True, 
-               type="primary" if st.session_state.subarea_seleccionada == "Dian varios" else "secondary"):
-        st.session_state.subarea_seleccionada = "Dian varios"
-        st.query_params.update(subarea="Dian varios")
-        st.rerun()
-
-with tab2:
     if st.button("Seleccionar Renta", key="select_renta", use_container_width=True,
                type="primary" if st.session_state.subarea_seleccionada == "Renta" else "secondary"):
         st.session_state.subarea_seleccionada = "Renta"
         st.query_params.update(subarea="Renta")
         st.rerun()
 
-with tab3:
+with tab2:
     if st.button("Seleccionar Timbre", key="select_timbre", use_container_width=True,
                type="primary" if st.session_state.subarea_seleccionada == "Timbre" else "secondary"):
         st.session_state.subarea_seleccionada = "Timbre"
         st.query_params.update(subarea="Timbre")
         st.rerun()
 
-with tab4:
-    if st.button("Seleccionar Dian Full", key="select_dianfull", use_container_width=True,
-               type="primary" if st.session_state.subarea_seleccionada == "Dian Full" else "secondary"):
-        st.session_state.subarea_seleccionada = "Dian Full"
-        st.query_params.update(subarea="Dian Full")
+with tab3:
+    if st.button("Seleccionar Retencion", key="select_retencion", use_container_width=True,
+               type="primary" if st.session_state.subarea_seleccionada == "Retencion" else "secondary"):
+        st.session_state.subarea_seleccionada = "Retencion"
+        st.query_params.update(subarea="Retencion")
         st.rerun()
 
 # Descripción de la aplicación
@@ -141,10 +134,9 @@ respuestas precisas a consultas jurídicas en el área de derecho tributario col
 
 ### Base de conocimiento actual: {st.session_state.subarea_seleccionada}
 
-- **Dian varios**: Consultas sobre conceptos varios de la Dian desde enero de 2017 hasta diciembre de 2024 (Chroma)
 - **Renta**: Consultas sobre el Impuesto de Renta desde enero de 2017 hasta diciembre de 2024 (Pinecone)
 - **Timbre**: Consultas sobre el Impuesto de Timbre desde enero de 2017 hasta diciembre de 2024 (Pinecone)
-- **Dian Full**: Consultas sobre todos los conceptos de la Dian desde enero de 2017 hasta diciembre de 2024 (Pinecone)
+- **Retencion**: Consultas sobre Retención en la Fuente desde enero de 2017 hasta diciembre de 2024 (Pinecone)
 """)
 
 # Verificar si la colección existe
