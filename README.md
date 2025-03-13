@@ -10,6 +10,7 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
   - Renta: Documentos sobre el Impuesto de Renta
   - Timbre: Documentos sobre el Impuesto de Timbre
   - Retencion: Documentos sobre Retención en la Fuente
+  - IVA: Documentos sobre el Impuesto al Valor Agregado
 - **Verificación de fuentes**:
   - Acceso directo a los documentos citados en las respuestas
   - Organización por categorías tributarias
@@ -25,6 +26,7 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
   - `4_Retencion.py`: Página para consultas sobre Retención en la Fuente
   - `5_Biblioteca.py`: Página para acceder a los documentos jurídicos
   - `6_Buzón_de_Observaciones.py`: Página para enviar comentarios y sugerencias
+  - `7_IVA.py`: Página para consultas sobre Impuesto al Valor Agregado
 - `pages_hidden/`: Directorio con páginas ocultas (no visibles en la interfaz)
   - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian (oculta)
 - `graph/`: Directorio con definiciones de grafos LangGraph

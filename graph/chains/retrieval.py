@@ -41,6 +41,11 @@ RETENCION_INDEX_NAME = "retencion"
 RETENCION_NAMESPACE = "retencion"
 RETENCION_TOP_K = 8  # Valor aumentado específicamente para Retención
 
+# Configuración específica para IVA
+IVA_INDEX_NAME = "iva"
+IVA_NAMESPACE = "iva"
+IVA_TOP_K = 8  # Valor específico para IVA
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -167,6 +172,12 @@ def query_retencion(query: str, top_k: int = RETENCION_TOP_K):
     """
     return query_pinecone(query, index_name=RETENCION_INDEX_NAME, namespace=RETENCION_NAMESPACE, top_k=top_k)
 
+def query_iva(query: str, top_k: int = IVA_TOP_K):
+    """
+    Consulta específica para documentos de IVA.
+    """
+    return query_pinecone(query, index_name=IVA_INDEX_NAME, namespace=IVA_NAMESPACE, top_k=top_k)
+
 class MultiRetriever:
     """
     Retriever que puede consultar diferentes fuentes según el tema.
@@ -202,6 +213,12 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de Retención")
                 docs = query_retencion(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Retención)")
+                return docs
+            elif topic.strip() == "IVA":
+                # Usar Pinecone para consultas de IVA
+                print("MultiRetriever: Usando Pinecone para consultas de IVA")
+                docs = query_iva(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (IVA)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)
