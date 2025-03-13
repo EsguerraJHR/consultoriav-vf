@@ -24,8 +24,8 @@ st.title("Consultas sobre Impuesto de Timbre")
 # Descripción de la página
 st.markdown("""
 Esta sección le permite realizar consultas específicas sobre el Impuesto de Timbre en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre timbre desde enero de 2017 hasta diciembre de 2024.
-""")
+La base de conocimiento incluye conceptos de la Dian sobre timbre desde 2007 hasta diciembre de 2025. <u>En esta pestaña solo hay un documento de 210 páginas</u> que contiene los conceptos de la Dian sobre timbre desde 2007 hasta el 5 de marzo de 2025. Pueden acceder al documento aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+""", unsafe_allow_html=True)
 
 # Verificar si la colección existe
 try:

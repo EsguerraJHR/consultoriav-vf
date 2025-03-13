@@ -14,6 +14,7 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
   - Acceso directo a los documentos citados en las respuestas
   - Organización por categorías tributarias
   - Trazabilidad de la información jurídica
+- **Buzón de Observaciones**: Sistema para recibir comentarios y sugerencias de los usuarios
 
 ## Estructura del Proyecto
 
@@ -23,6 +24,7 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
   - `3_Timbre.py`: Página para consultas sobre Impuesto de Timbre
   - `4_Retencion.py`: Página para consultas sobre Retención en la Fuente
   - `5_Biblioteca.py`: Página para acceder a los documentos jurídicos
+  - `6_Buzón_de_Observaciones.py`: Página para enviar comentarios y sugerencias
 - `pages_hidden/`: Directorio con páginas ocultas (no visibles en la interfaz)
   - `1_Dian_varios.py`: Página para consultas sobre conceptos de la Dian (oculta)
 - `graph/`: Directorio con definiciones de grafos LangGraph
@@ -40,6 +42,7 @@ Aplicación de asistencia jurídica tributaria que utiliza técnicas avanzadas d
   - Pinecone
   - Tavily (opcional)
   - LangChain (opcional para trazabilidad)
+- Cuenta de correo electrónico (para el buzón de observaciones)
 
 ## Instalación
 

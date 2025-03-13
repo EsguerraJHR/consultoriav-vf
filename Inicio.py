@@ -1,6 +1,7 @@
 import streamlit as st
 from dotenv import load_dotenv
 import os
+from PIL import Image
 
 # Cargar variables de entorno
 load_dotenv()
@@ -12,15 +13,17 @@ st.set_page_config(
     layout="wide"
 )
 
-# Título principal centrado
-st.markdown("<h1 style='text-align: center;'>Asistente Jurídico Tributario</h1>", unsafe_allow_html=True)
+# Crear una fila para el logo y el título
+col1, col2 = st.columns([1, 4])
 
-# Imagen o logo centrado con CSS personalizado
-st.markdown("""
-<div style="display: flex; justify-content: center; margin-top: -5px; margin-bottom: 20px;">
-    <img src="https://cdn-icons-png.flaticon.com/512/2534/2534183.png" width="150">
-</div>
-""", unsafe_allow_html=True)
+# Cargar y mostrar la imagen local en la columna izquierda
+with col1:
+    image = Image.open("EJHR.AI.png")
+    st.image(image, width=100)
+
+# Título principal en la columna derecha
+with col2:
+    st.markdown("<h1 style='text-align: left;'>Asistente Jurídico Tributario</h1>", unsafe_allow_html=True)
 
 # Descripción concisa de la aplicación
 st.markdown("""

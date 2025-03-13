@@ -20,7 +20,7 @@ st.title("📚 Biblioteca Jurídica Tributaria")
 # Descripción de la página
 st.markdown("""
 Esta sección le permite acceder a los documentos oficiales utilizados como fuentes en las respuestas generadas.
-Puede explorar los documentos por categoría, realizar búsquedas y verificar la información citada.
+Puede explorar los documentos por categoría, realizar búsquedas y verificar la información citada. Esta función será funcional en la versión final. Por ahora podrán acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """)
 
 # Crear pestañas para las diferentes categorías
