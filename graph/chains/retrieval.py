@@ -46,6 +46,21 @@ IVA_INDEX_NAME = "iva"
 IVA_NAMESPACE = "iva"
 IVA_TOP_K = 8  # Valor específico para IVA
 
+# Configuración específica para Impuesto al Consumo
+IPOCONSUMO_INDEX_NAME = "ipoconsumo"
+IPOCONSUMO_NAMESPACE = "ipoconsumo"
+IPOCONSUMO_TOP_K = 8  # Valor específico para Impuesto al Consumo
+
+# Configuración específica para Aduanas
+ADUANAS_INDEX_NAME = "aduanas"
+ADUANAS_NAMESPACE = "aduanas"
+ADUANAS_TOP_K = 8  # Valor específico para Aduanas
+
+# Configuración específica para Cambiario
+CAMBIARIO_INDEX_NAME = "cambiario"
+CAMBIARIO_NAMESPACE = "cambiario"
+CAMBIARIO_TOP_K = 8  # Valor específico para Cambiario
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -178,6 +193,24 @@ def query_iva(query: str, top_k: int = IVA_TOP_K):
     """
     return query_pinecone(query, index_name=IVA_INDEX_NAME, namespace=IVA_NAMESPACE, top_k=top_k)
 
+def query_ipoconsumo(query: str, top_k: int = IPOCONSUMO_TOP_K):
+    """
+    Consulta específica para documentos de Impuesto al Consumo.
+    """
+    return query_pinecone(query, index_name=IPOCONSUMO_INDEX_NAME, namespace=IPOCONSUMO_NAMESPACE, top_k=top_k)
+
+def query_aduanas(query: str, top_k: int = ADUANAS_TOP_K):
+    """
+    Consulta específica para documentos de Aduanas.
+    """
+    return query_pinecone(query, index_name=ADUANAS_INDEX_NAME, namespace=ADUANAS_NAMESPACE, top_k=top_k)
+
+def query_cambiario(query: str, top_k: int = CAMBIARIO_TOP_K):
+    """
+    Consulta específica para documentos de Cambiario.
+    """
+    return query_pinecone(query, index_name=CAMBIARIO_INDEX_NAME, namespace=CAMBIARIO_NAMESPACE, top_k=top_k)
+
 class MultiRetriever:
     """
     Retriever que puede consultar diferentes fuentes según el tema.
@@ -219,6 +252,24 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de IVA")
                 docs = query_iva(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (IVA)")
+                return docs
+            elif topic.strip() == "Impuesto al Consumo":
+                # Usar Pinecone para consultas de Impuesto al Consumo
+                print("MultiRetriever: Usando Pinecone para consultas de Impuesto al Consumo")
+                docs = query_ipoconsumo(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Impuesto al Consumo)")
+                return docs
+            elif topic.strip() == "Aduanas":
+                # Usar Pinecone para consultas de Aduanas
+                print("MultiRetriever: Usando Pinecone para consultas de Aduanas")
+                docs = query_aduanas(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Aduanas)")
+                return docs
+            elif topic.strip() == "Cambiario":
+                # Usar Pinecone para consultas de Cambiario
+                print("MultiRetriever: Usando Pinecone para consultas de Cambiario")
+                docs = query_cambiario(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Cambiario)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)

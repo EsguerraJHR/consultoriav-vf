@@ -5,7 +5,7 @@ import time
 import re
 # Importar el grafo completo en lugar de solo los componentes individuales
 from graph.graph import app, set_debug
-from graph.chains.retrieval import query_iva
+from graph.chains.retrieval import query_cambiario
 from graph.chains.openai_generation import generate_with_openai
 # Importar el módulo de reranking
 from graph.chains.reranking import retrieve_with_reranking
@@ -15,25 +15,25 @@ load_dotenv()
 
 # Configuración de la página
 st.set_page_config(
-    page_title="Consultas sobre IVA",
-    page_icon="🧾",
+    page_title="Consultas sobre Régimen Cambiario",
+    page_icon="💱",
     layout="wide"
 )
 
 # Título de la página
-st.title("Consultas sobre Impuesto al Valor Agregado (IVA)")
+st.title("Consultas sobre Régimen Cambiario")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre el Impuesto al Valor Agregado (IVA) en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre IVA desde 2017 hasta 2024. Contiene 894 conceptos de la Dian sobre retención. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Esta sección le permite realizar consultas específicas sobre el Régimen Cambiario en Colombia.
+La base de conocimiento incluye conceptos de la Dian y el Banco de la República sobre Régimen Cambiario desde 2017 hasta 2024. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
 # Verificar si la colección existe
 try:
     import pinecone
     pinecone_api_key = os.environ.get("PINECONE_API_KEY")
-    index_name = "iva"  # Nombre específico del índice para IVA
+    index_name = "cambiario"  # Nombre específico del índice para Cambiario
     
     if not pinecone_api_key:
         st.warning("No se ha configurado la API key de Pinecone. Por favor, configura la variable PINECONE_API_KEY en el archivo .env.")
@@ -45,9 +45,9 @@ try:
         if index_name not in existing_indexes:
             st.warning(f"El índice {index_name} no existe en Pinecone. Por favor, crea el índice primero.")
         else:
-            # Inicializar estado de sesión para IVA
-            if "iva_messages" not in st.session_state:
-                st.session_state.iva_messages = []
+            # Inicializar estado de sesión para Cambiario
+            if "cambiario_messages" not in st.session_state:
+                st.session_state.cambiario_messages = []
             
             # Función para formatear el texto con citas numeradas
             def formatear_texto_con_citas(texto, citas):
@@ -78,7 +78,7 @@ try:
                 return texto_formateado
             
             # Mostrar mensajes anteriores
-            for message in st.session_state.iva_messages:
+            for message in st.session_state.cambiario_messages:
                 with st.chat_message(message["role"]):
                     # Si hay citas, formatear el texto con ellas
                     if message["role"] == "assistant" and "citations" in message and message["citations"]:
@@ -110,12 +110,12 @@ try:
                             st.markdown(message["flow"])
             
             # Input para la consulta
-            query = st.chat_input("Escribe tu consulta sobre IVA...")
+            query = st.chat_input("Escribe tu consulta sobre Régimen Cambiario...")
             
             # Procesar la consulta
             if query:
                 # Agregar la consulta del usuario a los mensajes
-                st.session_state.iva_messages.append({
+                st.session_state.cambiario_messages.append({
                     "role": "user", 
                     "content": query
                 })
@@ -141,7 +141,7 @@ try:
                         flow_placeholder.markdown(f"**Procesando:**\n{flow_text}")
                     
                     # Mostrar el flujo de procesamiento
-                    update_flow(f"🔄 Iniciando procesamiento de la consulta sobre IVA...")
+                    update_flow(f"🔄 Iniciando procesamiento de la consulta sobre Régimen Cambiario...")
                     time.sleep(0.5)
                     
                     update_flow("🧠 Analizando la consulta...")
@@ -150,18 +150,18 @@ try:
                     update_flow("🔍 Ejecutando flujo RAG avanzado...")
                     time.sleep(1)
                     
-                    # Consultar directamente a Pinecone para IVA
+                    # Consultar directamente a Pinecone para Cambiario
                     try:
                         # Consultar directamente a Pinecone con reranking
-                        print("IVA.py: Consultando directamente a Pinecone (índice iva)")
+                        print("Cambiario.py: Consultando directamente a Pinecone (índice cambiario)")
                         # Usar la función de reranking para mejorar la relevancia de los documentos
-                        documents = retrieve_with_reranking(query, query_iva, top_k=8)
-                        print(f"IVA.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
+                        documents = retrieve_with_reranking(query, query_cambiario, top_k=8)
+                        print(f"Cambiario.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
                         
                         # Verificar si se encontraron documentos
                         if not documents:
                             update_flow("❌ No se encontraron documentos relevantes en Pinecone")
-                            response = "Lo siento, no encontré información relevante sobre tu consulta en la base de conocimiento de IVA. Por favor, intenta reformular tu pregunta o consulta otra base de conocimiento."
+                            response = "Lo siento, no encontré información relevante sobre tu consulta en la base de conocimiento de Régimen Cambiario. Por favor, intenta reformular tu pregunta o consulta otra base de conocimiento."
                             final_flow = '\n'.join(flow_steps)
                             flow_placeholder.empty()
                             st.markdown(response)
@@ -236,7 +236,7 @@ try:
                         documents = []
                 
                 # Agregar la respuesta del asistente a los mensajes
-                st.session_state.iva_messages.append({
+                st.session_state.cambiario_messages.append({
                     "role": "assistant", 
                     "content": response,
                     "documents": documents if 'documents' in locals() else [],
@@ -248,10 +248,10 @@ except Exception as e:
 
 # Información adicional en el sidebar
 with st.sidebar:
-    st.header("Información sobre IVA")
+    st.header("Información sobre Régimen Cambiario")
     
     # Botón para limpiar la conversación
-    if "iva_messages" in st.session_state:
+    if "cambiario_messages" in st.session_state:
         if st.button("Limpiar conversación", use_container_width=True):
-            st.session_state.iva_messages = []
-            st.rerun()
+            st.session_state.cambiario_messages = []
+            st.rerun() 
