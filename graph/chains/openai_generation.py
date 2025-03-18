@@ -94,6 +94,10 @@ Tu respuesta debe organizarse OBLIGATORIAMENTE en las siguientes secciones:
         - Directrices detalladas y definitivas para la situación planteada.
         - Desarrolla a profundidad cada recomendación con su fundamento legal.
 
+6. Citas:
+   - Al final de tu respuesta, después del análisis, incluye un punto 6 llamado "Citas" que liste todas las citas utilizadas en el formato "6.n. [nombre_del_documento]".
+   - Ejemplo: "6.1. 2024_12_concepto_1163(010470)."
+
 INSTRUCCIONES SOBRE CITAS:
 1. Usa el formato de cita [n] después de cada afirmación basada en los documentos.
 2. Numera las citas secuencialmente: [1], [2], [3], etc.
@@ -118,7 +122,7 @@ INSTRUCCIONES ESPECIALES:
 Ejemplo de formato correcto:
 "La tarifa general del IVA en Colombia es del 19% [1]. Sin embargo, es importante notar que el Consejo de Estado, en sentencia reciente, ha modificado la interpretación de su base gravable en ciertos casos [2], contradiciendo la postura tradicional de la DIAN [3]. Esta modificación implica que ahora los contribuyentes deben calcular la base gravable considerando los siguientes elementos específicos: primero, ... segundo, ... tercero, ... Esta nueva interpretación tiene un impacto significativo en sectores como el de servicios, donde anteriormente..."
 
-NO uses notas al pie ni referencias al final. Las citas deben estar integradas en el texto."""
+NO uses notas al pie ni referencias al final. Las citas deben estar integradas en el texto y además listadas al final en la sección 6."""
     
     user_message = f"""Pregunta: {question}
 
@@ -126,7 +130,7 @@ DOCUMENTOS PARA CONSULTA:
 {formatted_docs}
 
 IMPORTANTE: 
-1. Responde siguiendo ESTRICTAMENTE la estructura de 5 secciones principales especificada (REFERENCIA, CONTENIDO, ENTENDIMIENTO, CONCLUSIÓN, ANÁLISIS).
+1. Responde siguiendo ESTRICTAMENTE la estructura de secciones principales especificada (REFERENCIA, CONTENIDO, ENTENDIMIENTO, CONCLUSIÓN, ANÁLISIS, y CITAS).
 2. Usa el formato de citas numéricas [1], [2], etc. después de cada afirmación que hagas.
 3. Cada número debe corresponder al documento del que extraes la información.
 4. Asegúrate de que CADA afirmación importante tenga su correspondiente cita entre corchetes.
@@ -135,7 +139,8 @@ IMPORTANTE:
 7. Desarrolla EXTENSAMENTE y en profundidad cada punto del análisis, evitando respuestas superficiales.
 8. Mantén una numeración clara (1., 2., 3., etc. para secciones principales y 5.1., 5.2., etc. para subsecciones del análisis).
 9. NUNCA sugieras consultar a un asesor tributario, abogado u otro profesional externo. Tus respuestas deben ser DEFINITIVAS.
-10. Proporciona directrices claras y específicas en lugar de recomendaciones generales."""
+10. Proporciona directrices claras y específicas en lugar de recomendaciones generales.
+11. IMPORTANTE: Al final de tu respuesta, añade un punto 6 llamado "Citas" donde listes todas las referencias utilizadas."""
     
     try:
         # Llamar a la API de OpenAI
@@ -155,6 +160,44 @@ IMPORTANTE:
         citations = extract_citations_from_text(response_text, documents)
         
         print(f"Se extrajeron {len(citations)} citas del texto")
+        
+        # Verificar si la respuesta ya incluye un punto 6 con citas
+        if "6. Citas" not in response_text and len(citations) > 0:
+            # Crear la sección de citas
+            citas_section = "\n\n6. Citas\n\n"
+            for i, citation in enumerate(citations):
+                doc_title = citation["document_title"]
+                # Simplificar el título para mostrar solo el nombre del archivo
+                if "Pinecone: pinecone_docs/" in doc_title:
+                    doc_title = doc_title.replace("Pinecone: pinecone_docs/", "")
+                elif "Pinecone: " in doc_title:
+                    doc_title = doc_title.replace("Pinecone: ", "")
+                
+                # Eliminar información de página para el listado
+                if " (Pág. " in doc_title:
+                    doc_title = doc_title.split(" (Pág. ")[0]
+                
+                citas_section += f"   ○  6.{i+1}. {doc_title}.\n"
+            
+            # Verificar si hay una sección de "Conclusiones" o "Conclusión" en la respuesta
+            if "CONCLUS" in response_text.upper():
+                # Insertar la sección de citas después de la sección de análisis
+                parts = response_text.split("5. ANÁLISIS", 1)
+                if len(parts) > 1:
+                    # Buscar el final de la sección de análisis
+                    analysis_section = parts[1]
+                    # Buscar dónde termina el análisis (puede ser con una línea en blanco o el final del texto)
+                    end_of_analysis = analysis_section.rfind("\n\n")
+                    if end_of_analysis != -1:
+                        response_text = parts[0] + "5. ANÁLISIS" + analysis_section[:end_of_analysis] + citas_section + analysis_section[end_of_analysis:]
+                    else:
+                        response_text = response_text + citas_section
+                else:
+                    # Si no encontramos la sección de análisis, añadimos al final
+                    response_text = response_text + citas_section
+            else:
+                # Si no hay una estructura clara, añadir al final
+                response_text = response_text + citas_section
         
         return {
             "text": response_text,

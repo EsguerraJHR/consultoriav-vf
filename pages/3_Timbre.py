@@ -7,6 +7,8 @@ import re
 from graph.graph import app, set_debug
 from graph.chains.retrieval import query_timbre
 from graph.chains.openai_generation import generate_with_openai
+# Importar el módulo de reranking
+from graph.chains.reranking import retrieve_with_reranking
 
 # Cargar variables de entorno
 load_dotenv()
@@ -56,7 +58,22 @@ try:
                     return texto
                 
                 # Reemplazar los corchetes de cita por etiquetas HTML para mejorar la visualización
-                texto_formateado = re.sub(r'\[(\d+)\]', r'<sup>[\1]</sup>', texto)
+                # Primero, crear un diccionario de citas para acceder rápidamente a la información de la página
+                citas_dict = {}
+                for i, cita in enumerate(citas):
+                    citas_dict[i+1] = cita
+                
+                # Función para reemplazar cada cita con su versión HTML que incluye la página
+                def reemplazar_cita(match):
+                    num_cita = int(match.group(1))
+                    if num_cita in citas_dict:
+                        cita = citas_dict[num_cita]
+                        page = cita.get('page', None)
+                        if page and page != 0:
+                            return f'<sup>[{num_cita}, p.{page}]</sup>'
+                    return f'<sup>[{num_cita}]</sup>'
+                
+                texto_formateado = re.sub(r'\[(\d+)\]', reemplazar_cita, texto)
                 
                 return texto_formateado
             
@@ -133,10 +150,11 @@ try:
                     
                     # Consultar directamente a Pinecone para Timbre
                     try:
-                        # Consultar directamente a Pinecone
+                        # Consultar directamente a Pinecone con reranking
                         print("Timbre.py: Consultando directamente a Pinecone (índice timbre)")
-                        documents = query_timbre(query)
-                        print(f"Timbre.py: Recuperados {len(documents)} documentos de Pinecone")
+                        # Usar la función de reranking para mejorar la relevancia de los documentos
+                        documents = retrieve_with_reranking(query, query_timbre, top_k=8)
+                        print(f"Timbre.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
                         
                         # Verificar si se encontraron documentos
                         if not documents:
@@ -149,6 +167,9 @@ try:
                             documents = []
                         else:
                             update_flow(f"📝 Encontrados {len(documents)} documentos relevantes")
+                            time.sleep(0.5)
+                            
+                            update_flow("🔄 Aplicado reranking para mejorar la relevancia")
                             time.sleep(0.5)
                             
                             update_flow("✍️ Generando respuesta...")
@@ -195,7 +216,9 @@ try:
                             with st.expander("Ver fuentes utilizadas"):
                                 for i, doc in enumerate(documents):
                                     source = doc.metadata.get('source', f'Documento {i+1}')
-                                    st.markdown(f"**Fuente {i+1}:** `{source}`")
+                                    page = doc.metadata.get('page', None)
+                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
+                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
                                     st.markdown(f"```\n{doc.page_content}\n```")
                             
                             # Mostrar el flujo de procesamiento
@@ -203,8 +226,8 @@ try:
                                 st.markdown(final_flow)
                     
                     except Exception as e:
-                        update_flow(f"❌ Error al consultar Pinecone o generar respuesta: {str(e)}")
-                        response = f"Lo siento, ocurrió un error: {str(e)}"
+                        update_flow(f"❌ Error: {str(e)}")
+                        response = f"Lo siento, ocurrió un error al procesar tu consulta: {str(e)}"
                         final_flow = '\n'.join(flow_steps)
                         flow_placeholder.empty()
                         st.markdown(response)

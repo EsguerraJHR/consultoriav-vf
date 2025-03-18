@@ -31,6 +31,7 @@ RENTA_NAMESPACE = "renta"
 # Configuración específica para Timbre
 TIMBRE_INDEX_NAME = "timbre"
 TIMBRE_NAMESPACE = "timbre"
+TIMBRE_TOP_K = 8  # Valor específico para Timbre
 
 # Configuración específica para Dian Full
 DIANFULL_INDEX_NAME = "dianfull"
@@ -169,7 +170,7 @@ def query_pinecone(query: str, index_name=RENTA_INDEX_NAME, namespace=RENTA_NAME
         traceback.print_exc()
         return []
 
-def query_timbre(query: str, top_k: int = TOP_K):
+def query_timbre(query: str, top_k: int = TIMBRE_TOP_K):
     """
     Consulta específica para documentos de Timbre.
     """

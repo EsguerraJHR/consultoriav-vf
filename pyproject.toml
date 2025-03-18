@@ -2,7 +2,7 @@
 name = "langgraph-course"
 version = "0.1.0"
 description = ""
-authors = ["Eden Marco <emarco177@gmail.com>"]
+authors = ["Hernando Castro Arana <hcastro@esguerrajhr.com>"]
 readme = "README.md"
 package-mode = false
 
@@ -25,7 +25,7 @@ unstructured = "^0.16.23"
 streamlit = "^1.42.2"
 anthropic = "^0.49.0"
 openai = "^1.65.2"
-pinecone = "^6.0.1"
+pinecone = "^6.0.2"
 
 [build-system]
 requires = ["poetry-core"]

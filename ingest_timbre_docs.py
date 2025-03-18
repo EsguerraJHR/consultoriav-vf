@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Script para ingestar documentos de timbre en Pinecone usando text-embedding-3-large.
+Script para ingestar documentos de Timbre en Pinecone usando text-embedding-3-large.
 """
 
 import os
@@ -25,15 +25,16 @@ load_dotenv()
 
 # Configuración
 PINECONE_API_KEY = os.environ.get("PINECONE_API_KEY")
-PINECONE_ENVIRONMENT = os.environ.get("PINECONE_ENVIRONMENT", "us-east-1")
+PINECONE_ENVIRONMENT = "us-east-1"  # Región mostrada en la imagen
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 INDEX_NAME = "timbre"  # Nombre del índice específico para Timbre
 NAMESPACE = "timbre"
 EMBEDDING_MODEL = "text-embedding-3-large"
-EMBEDDING_DIMENSION = 3072  # Dimensión para text-embedding-3-large
-CHUNK_SIZE = 1000
-CHUNK_OVERLAP = 200
+EMBEDDING_DIMENSION = 3074  # Dimensión correcta para text-embedding-3-large según documentación
+CHUNK_SIZE = 500  # Optimizado según recomendación
+CHUNK_OVERLAP = 50  # Optimizado según recomendación
 BATCH_SIZE = 100  # Número de documentos a procesar por lote
+TOP_K = 8  # Número de resultados a recuperar
 
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -121,10 +122,48 @@ def get_embeddings(texts: List[str]) -> List[List[float]]:
     
     return embeddings
 
+def create_pinecone_index():
+    """
+    Crea el índice en Pinecone si no existe.
+    """
+    try:
+        import pinecone
+        from pinecone import ServerlessSpec
+        
+        # Inicializar Pinecone con la nueva API
+        pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
+        
+        # Verificar si el índice existe
+        existing_indexes = [index.name for index in pc.list_indexes()]
+        
+        if INDEX_NAME not in existing_indexes:
+            print(f"Creando índice {INDEX_NAME} en Pinecone...")
+            pc.create_index(
+                name=INDEX_NAME,
+                dimension=EMBEDDING_DIMENSION,
+                metric='cosine',
+                spec=ServerlessSpec(
+                    cloud='aws',
+                    region='us-east-1'
+                )
+            )
+            print(f"Índice {INDEX_NAME} creado exitosamente.")
+        else:
+            print(f"El índice {INDEX_NAME} ya existe.")
+        
+        return pc.Index(INDEX_NAME)
+        
+    except Exception as e:
+        print(f"Error al crear el índice: {str(e)}")
+        return None
+
 def initialize_pinecone():
     """
     Inicializa la conexión con Pinecone y verifica que el índice exista.
     """
+    import pinecone
+    
+    # Inicializar Pinecone con la nueva API
     pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
     
     # Verificar si el índice existe
@@ -132,19 +171,15 @@ def initialize_pinecone():
     
     if INDEX_NAME not in existing_indexes:
         print(f"El índice {INDEX_NAME} no existe en Pinecone.")
-        print("Por favor, crea el índice manualmente en la consola de Pinecone con las siguientes especificaciones:")
-        print(f"- Nombre: {INDEX_NAME}")
-        print(f"- Dimensión: {EMBEDDING_DIMENSION}")
-        print("- Métrica: cosine")
-        print("- Tipo: Serverless")
-        return None
+        print("Intentando crear el índice automáticamente...")
+        return create_pinecone_index()
     
     print(f"Índice {INDEX_NAME} encontrado. Procediendo con la ingesta...")
     return pc.Index(INDEX_NAME)
 
 def upsert_to_pinecone(index, chunks: List[Document]):
     """
-    Inserta los chunks en Pinecone.
+    Inserta los chunks en Pinecone con metadatos mejorados.
     """
     # Preparar los textos y metadatos
     texts = [chunk.page_content for chunk in chunks]
@@ -153,17 +188,28 @@ def upsert_to_pinecone(index, chunks: List[Document]):
     # Obtener embeddings
     embeddings = get_embeddings(texts)
     
-    # Preparar los vectores para Pinecone
+    # Preparar los vectores para Pinecone con metadatos mejorados
     vectors = []
     for i, (text, embedding, metadata) in enumerate(zip(texts, embeddings, metadatas)):
+        # Extraer información adicional para metadatos mejorados
+        title = os.path.basename(metadata.get("source", ""))
+        
+        # Crear metadatos mejorados
+        enhanced_metadata = {
+            # Almacenar el texto completo en lugar de limitarlo a 1000 caracteres
+            "text": text,
+            "source": metadata.get("source", ""),
+            "page": metadata.get("page", 0),
+            "title": title,
+            "chunk_id": i,
+            "chunk_size": len(text),
+            "date_processed": time.strftime("%Y-%m-%d")
+        }
+        
         vectors.append({
             "id": f"timbre-doc-{i}",
             "values": embedding,
-            "metadata": {
-                "text": text[:1000],  # Limitar el tamaño del texto en los metadatos
-                "source": metadata.get("source", ""),
-                "page": metadata.get("page", 0)
-            }
+            "metadata": enhanced_metadata
         })
     
     # Insertar en lotes
@@ -177,13 +223,13 @@ def main():
     """
     Función principal para la ingesta de documentos.
     """
-    # Directorio donde se encuentran los documentos de timbre
+    # Directorio donde se encuentran los documentos de Timbre
     docs_dir = "data/timbre"
     
     # Verificar si el directorio existe
     if not os.path.exists(docs_dir):
         os.makedirs(docs_dir, exist_ok=True)
-        print(f"Directorio {docs_dir} creado. Por favor, coloca tus documentos de timbre en este directorio.")
+        print(f"Directorio {docs_dir} creado. Por favor, coloca tus documentos de Timbre en este directorio.")
         return
     
     # Cargar documentos

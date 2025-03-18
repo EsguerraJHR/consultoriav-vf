@@ -26,7 +26,7 @@ st.title("Consultas sobre Impuesto al Consumo")
 # Descripción de la página
 st.markdown("""
 Esta sección le permite realizar consultas específicas sobre el Impuesto al Consumo en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre Impuesto al Consumo desde 2017 hasta 2024. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+La base de conocimiento incluye conceptos de la Dian sobre Impuesto al Consumo desde 2017 hasta 2024. Contiene 47 conceptos de la Dian sobre ipoconsumo. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
 # Verificar si la colección existe

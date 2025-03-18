@@ -127,22 +127,32 @@ def initialize_pinecone():
     """
     Inicializa la conexión con Pinecone y verifica que el índice exista.
     """
-    pc = pinecone.Pinecone(api_key=PINECONE_API_KEY)
-    
-    # Verificar si el índice existe
-    existing_indexes = [index.name for index in pc.list_indexes()]
-    
-    if INDEX_NAME not in existing_indexes:
-        print(f"El índice {INDEX_NAME} no existe en Pinecone.")
-        print("Por favor, crea el índice manualmente en la consola de Pinecone con las siguientes especificaciones:")
-        print(f"- Nombre: {INDEX_NAME}")
-        print(f"- Dimensión: {EMBEDDING_DIMENSION}")
-        print("- Métrica: cosine")
-        print("- Tipo: Serverless")
+    try:
+        # Inicializar Pinecone para la versión 2.2.4
+        import pinecone
+        pinecone.init(api_key=PINECONE_API_KEY, environment=PINECONE_ENVIRONMENT)
+        
+        # Verificar si el índice existe
+        existing_indexes = pinecone.list_indexes()
+        
+        if INDEX_NAME not in existing_indexes:
+            print(f"El índice {INDEX_NAME} no existe en Pinecone.")
+            print("Por favor, crea el índice manualmente en la consola de Pinecone con las siguientes especificaciones:")
+            print(f"- Nombre: {INDEX_NAME}")
+            print(f"- Dimensión: {EMBEDDING_DIMENSION}")
+            print("- Métrica: cosine")
+            print("- Tipo: Serverless")
+            return None
+        
+        print(f"Índice {INDEX_NAME} encontrado. Procediendo con la ingesta...")
+        # Obtener el índice
+        index = pinecone.Index(INDEX_NAME)
+        return index
+    except Exception as e:
+        print(f"Error al conectar con Pinecone: {str(e)}")
+        import traceback
+        traceback.print_exc()
         return None
-    
-    print(f"Índice {INDEX_NAME} encontrado. Procediendo con la ingesta...")
-    return pc.Index(INDEX_NAME)
 
 def upsert_to_pinecone(index, chunks: List[Document]):
     """
@@ -173,18 +183,23 @@ def upsert_to_pinecone(index, chunks: List[Document]):
             "date_processed": time.strftime("%Y-%m-%d")
         }
         
-        vectors.append({
-            "id": f"retencion-doc-{i}",
-            "values": embedding,
-            "metadata": enhanced_metadata
-        })
+        # Para la versión 2.2.4 de Pinecone, agregamos cada vector como un tuple (id, vector, metadata)
+        vector_tuple = (f"retencion-doc-{i}", embedding, enhanced_metadata)
+        vectors.append(vector_tuple)
     
-    # Insertar en lotes
+    # Insertar en lotes para la versión 2.2.4
     for i in range(0, len(vectors), BATCH_SIZE):
         batch = vectors[i:i+BATCH_SIZE]
-        index.upsert(vectors=batch, namespace=NAMESPACE)
-        print(f"Insertados {i+len(batch)}/{len(vectors)} vectores en Pinecone")
-        time.sleep(1)  # Pequeña pausa para evitar límites de rate
+        try:
+            index.upsert(vectors=batch, namespace=NAMESPACE)
+            print(f"Insertados {i+len(batch)}/{len(vectors)} vectores en Pinecone")
+        except Exception as e:
+            print(f"Error al insertar lote {i}-{i+BATCH_SIZE}: {str(e)}")
+            import traceback
+            traceback.print_exc()
+        
+        # Pequeña pausa para evitar límites de rate
+        time.sleep(1)
 
 def main():
     """
