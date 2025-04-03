@@ -128,3 +128,51 @@ def retrieve_with_reranking(query: str, retriever_func, top_k: int = 5, **kwargs
     reranked_docs = rerank_documents(query, initial_docs, top_k=top_k)
     
     return reranked_docs 
+
+def retrieve_with_multi_index_reranking(query: str, top_k: int = 10):
+    """
+    Recupera documentos de múltiples índices y aplica reranking global.
+    
+    Esta función recupera documentos de todos los índices disponibles,
+    luego aplica reranking para obtener los más relevantes independientemente
+    de su origen.
+    
+    Args:
+        query: La consulta del usuario
+        top_k: Número de documentos a devolver después del reranking
+        
+    Returns:
+        Lista de documentos más relevantes después del reranking
+    """
+    # Importar aquí para evitar dependencias circulares
+    from graph.chains.retrieval import query_all_indices
+    
+    print(f"retrieve_with_multi_index_reranking: Consultando múltiples índices para: '{query}'")
+    
+    # Recuperar documentos de todos los índices (más de los necesarios)
+    initial_docs = query_all_indices(query, top_k=top_k*2)
+    
+    print(f"retrieve_with_multi_index_reranking: Recuperados {len(initial_docs)} documentos en total")
+    
+    if not initial_docs:
+        print("No se encontraron documentos en ningún índice")
+        return []
+    
+    # Aplicar reranking a todos los documentos combinados
+    print(f"retrieve_with_multi_index_reranking: Aplicando reranking global...")
+    reranked_docs = rerank_documents(query, initial_docs, top_k=top_k)
+    
+    # Imprimir información sobre el origen de los documentos reordenados
+    indices_counts = {}
+    for doc in reranked_docs:
+        index_name = doc.metadata.get('source_index', 'Desconocido')
+        if index_name in indices_counts:
+            indices_counts[index_name] += 1
+        else:
+            indices_counts[index_name] = 1
+    
+    print(f"retrieve_with_multi_index_reranking: Distribución final de documentos por índice:")
+    for index_name, count in indices_counts.items():
+        print(f"  - {index_name}: {count} documentos")
+    
+    return reranked_docs 

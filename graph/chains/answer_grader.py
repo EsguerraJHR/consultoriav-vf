@@ -3,7 +3,6 @@ from langchain_core.pydantic_v1 import BaseModel, Field
 from langchain_core.runnables import RunnableSequence
 from langchain_openai import ChatOpenAI
 import os
-import streamlit as st
 from dotenv import load_dotenv
 
 # Cargar variables de entorno
@@ -12,11 +11,7 @@ load_dotenv()
 # Obtener la clave API de OpenAI
 openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
-    # Intentar obtener la clave de los secretos de Streamlit
-    try:
-        openai_api_key = st.secrets["OPENAI_API_KEY"]
-    except:
-        raise ValueError("No se encontró la clave API de OpenAI. Por favor, configúrela en las variables de entorno o en los secretos de Streamlit.")
+    raise ValueError("No se encontró la clave API de OpenAI. Por favor, configúrela en las variables de entorno.")
 
 
 class GradeAnswer(BaseModel):

@@ -243,12 +243,19 @@ IMPORTANTE:
                     doc_title = doc_title.replace("pinecone_aduanas/data/aduanas/", "")
                 elif "pinecone_cambiario/data/cambiario/" in doc_title:
                     doc_title = doc_title.replace("pinecone_cambiario/data/cambiario/", "")
+                elif "pinecone_ica/data/ica/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_ica/data/ica/", "")
                 elif "data/timbre/" in doc_title:
                     doc_title = doc_title.replace("data/timbre/", "")
                 elif "data/renta/" in doc_title:
                     doc_title = doc_title.replace("data/renta/", "")
                 elif "data/iva/" in doc_title:
                     doc_title = doc_title.replace("data/iva/", "")
+                elif "data/ica/" in doc_title:
+                    doc_title = doc_title.replace("data/ica/", "")
+                # Eliminación general de prefijos de tipo "data/XXX/"
+                else:
+                    doc_title = re.sub(r'data/\w+/', '', doc_title)
                 
                 # Eliminar información de página para el listado
                 if " (Pág. " in doc_title:
@@ -334,6 +341,10 @@ def extract_citations_from_text(text, documents):
             # Eliminar extensiones de archivo para mejorar la presentación
             source = source.replace('.pdf', '').replace('.html', '')
             
+            # Eliminar prefijos de tipo data/XXX/
+            if source.startswith("data/"):
+                source = re.sub(r'^data/\w+/', '', source)
+            
             citations.append({
                 "document_title": f"{source}{page_info}",
                 "cited_text": excerpt,
@@ -341,4 +352,100 @@ def extract_citations_from_text(text, documents):
                 "page": page
             })
     
-    return citations 
+    return citations
+
+def generate_simple_response(question: str, documents: List[Document]) -> Dict[str, Any]:
+    """
+    Genera una respuesta simplificada usando OpenAI sin estructura formal.
+    Ideal para la página General que consulta múltiples índices.
+    """
+    # Formatear documentos para OpenAI
+    formatted_docs = format_documents_for_openai(documents)
+    
+    # Preparar información de índices para incluir en la respuesta
+    index_info = {}
+    for doc in documents:
+        index_name = doc.metadata.get('source_index', 'Desconocido')
+        if index_name in index_info:
+            index_info[index_name] += 1
+        else:
+            index_info[index_name] = 1
+    
+    indices_str = ", ".join([f"{count} de {name}" for name, count in index_info.items()])
+    if indices_str:
+        indices_message = f"Se encontraron documentos relevantes en: {indices_str}."
+    else:
+        indices_message = "No se especificó el origen de los documentos."
+    
+    # Crear el sistema y el mensaje del usuario
+    system_message = """Eres un asistente jurídico tributario experto que proporciona respuestas claras y concisas basadas en la documentación oficial.
+    
+Tu objetivo es ofrecer información precisa y bien fundamentada, pero en un formato conversacional y directo, evitando estructuras rígidas.
+
+INSTRUCCIONES PARA GENERAR RESPUESTAS:
+
+1. Responde de manera conversacional pero con precisión técnica
+2. Utiliza un lenguaje claro y accesible, evitando jerga innecesaria
+3. Incluye citas numeradas [1], [2], etc. después de cada afirmación basada en los documentos
+4. Organiza la respuesta por temas relevantes si la consulta abarca múltiples aspectos
+5. Señala cuando existan opiniones divergentes o controversias
+6. Destaca la información más reciente o los cambios normativos importantes
+7. NUNCA incluyas secciones formales como "REFERENCIA", "CONTENIDO", "ENTENDIMIENTO", etc.
+8. Evita listas numeradas extensas; usa viñetas o párrafos cuando sea posible
+9. Mantén un tono útil pero profesional
+
+Ejemplo:
+"El régimen de retención en la fuente para pagos al exterior establece una tarifa general del 20% [1]. Sin embargo, en el caso de servicios técnicos prestados desde el extranjero, la tarifa aplicable es del 15% según la última modificación del artículo 408 del Estatuto Tributario [2]. Es importante tener en cuenta que estos pagos también están sujetos al impuesto sobre las ventas cuando el servicio se entiende prestado en Colombia, conforme al artículo 420 del mismo estatuto [3]."
+
+Intenta presentar la información de manera equilibrada, incluyendo tanto los aspectos favorables como los desfavorables para el contribuyente."""
+    
+    user_message = f"""Pregunta: {question}
+
+{indices_message}
+
+DOCUMENTOS PARA CONSULTA:
+{formatted_docs}
+
+INSTRUCCIONES ADICIONALES:
+1. Responde de manera conversacional pero precisa
+2. Usa el formato de citas numéricas [1], [2], etc. después de cada afirmación que hagas
+3. No estructures tu respuesta en secciones formales (no uses secciones como REFERENCIA, CONTENIDO, etc.)
+4. Organiza la información de manera lógica y fluida
+5. Presenta tanto aspectos favorables como desfavorables si corresponde
+6. Señala si hay contradicciones entre distintas fuentes o documentos"""
+    
+    try:
+        # Llamar a la API de OpenAI
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[
+                {"role": "system", "content": system_message},
+                {"role": "user", "content": user_message}
+            ],
+            temperature=0.3  # Temperatura un poco más alta para respuestas más naturales
+        )
+        
+        # Extraer el texto de la respuesta
+        response_text = response.choices[0].message.content
+        
+        # Extraer citas del texto usando el patrón [1], [2], etc.
+        citations = extract_citations_from_text(response_text, documents)
+        
+        print(f"Se extrajeron {len(citations)} citas del texto")
+        
+        return {
+            "text": response_text,
+            "citations": citations,
+            "indices_used": list(index_info.keys()),
+            "raw_message": response
+        }
+    
+    except Exception as e:
+        print(f"Error al generar respuesta con OpenAI: {str(e)}")
+        # Devolver una respuesta de error
+        return {
+            "text": f"Lo siento, hubo un error al generar la respuesta: {str(e)}",
+            "citations": [],
+            "indices_used": [],
+            "raw_message": None
+        } 

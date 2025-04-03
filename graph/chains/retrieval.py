@@ -25,8 +25,9 @@ EMBEDDING_MODEL = "text-embedding-3-large"
 TOP_K = 5  # Número de resultados a recuperar
 
 # Configuración específica para Renta
-RENTA_INDEX_NAME = os.environ.get("PINECONE_INDEX_NAME", "ejhr")
-RENTA_NAMESPACE = "renta"
+RENTA_INDEX_NAME = "ejhr"
+RENTA_NAMESPACE = "ejhr"
+RENTA_TOP_K = 8  # Valor específico para Renta
 
 # Configuración específica para Timbre
 TIMBRE_INDEX_NAME = "timbre"
@@ -46,6 +47,11 @@ RETENCION_TOP_K = 8  # Valor aumentado específicamente para Retención
 IVA_INDEX_NAME = "iva"
 IVA_NAMESPACE = "iva"
 IVA_TOP_K = 8  # Valor específico para IVA
+
+# Configuración específica para ICA
+ICA_INDEX_NAME = "ica"
+ICA_NAMESPACE = "ica"
+ICA_TOP_K = 8  # Valor específico para ICA
 
 # Configuración específica para Impuesto al Consumo
 IPOCONSUMO_INDEX_NAME = "ipoconsumo"
@@ -182,6 +188,12 @@ def query_dianfull(query: str, top_k: int = TOP_K):
     """
     return query_pinecone(query, index_name=DIANFULL_INDEX_NAME, namespace=DIANFULL_NAMESPACE, top_k=top_k)
 
+def query_renta(query: str, top_k: int = RENTA_TOP_K):
+    """
+    Consulta específica para documentos de Renta.
+    """
+    return query_pinecone(query, index_name=RENTA_INDEX_NAME, namespace=RENTA_NAMESPACE, top_k=top_k)
+
 def query_retencion(query: str, top_k: int = RETENCION_TOP_K):
     """
     Consulta específica para documentos de Retención.
@@ -193,6 +205,12 @@ def query_iva(query: str, top_k: int = IVA_TOP_K):
     Consulta específica para documentos de IVA.
     """
     return query_pinecone(query, index_name=IVA_INDEX_NAME, namespace=IVA_NAMESPACE, top_k=top_k)
+
+def query_ica(query: str, top_k: int = ICA_TOP_K):
+    """
+    Consulta específica para documentos de ICA.
+    """
+    return query_pinecone(query, index_name=ICA_INDEX_NAME, namespace=ICA_NAMESPACE, top_k=top_k)
 
 def query_ipoconsumo(query: str, top_k: int = IPOCONSUMO_TOP_K):
     """
@@ -212,6 +230,52 @@ def query_cambiario(query: str, top_k: int = CAMBIARIO_TOP_K):
     """
     return query_pinecone(query, index_name=CAMBIARIO_INDEX_NAME, namespace=CAMBIARIO_NAMESPACE, top_k=top_k)
 
+def query_all_indices(query: str, top_k: int = 10):
+    """
+    Consulta todos los índices disponibles y devuelve los documentos más relevantes.
+    Ideal para una búsqueda general en toda la base de conocimiento.
+    """
+    print(f"query_all_indices: Consultando todos los índices disponibles para: '{query}'")
+    
+    # Lista de funciones de consulta y sus nombres asociados
+    query_functions = [
+        (query_renta, "Renta"),
+        (query_timbre, "Timbre"),
+        (query_retencion, "Retención"),
+        (query_iva, "IVA"),
+        (query_ica, "ICA"),
+        (query_ipoconsumo, "Impuesto al Consumo"),
+        (query_aduanas, "Aduanas"),
+        (query_cambiario, "Cambiario")
+    ]
+    
+    all_documents = []
+    
+    # Consultar cada índice y recopilar documentos
+    for query_func, index_name in query_functions:
+        try:
+            print(f"query_all_indices: Consultando índice {index_name}")
+            # Obtener un número reducido de documentos de cada índice (proporcional al total deseado)
+            docs = query_func(query, top_k=top_k // len(query_functions) + 1)
+            
+            if docs:
+                print(f"query_all_indices: Se encontraron {len(docs)} documentos en {index_name}")
+                # Añadir información sobre la fuente para poder identificarlos después
+                for doc in docs:
+                    if 'source_index' not in doc.metadata:
+                        doc.metadata['source_index'] = index_name
+                all_documents.extend(docs)
+            else:
+                print(f"query_all_indices: No se encontraron documentos en {index_name}")
+        except Exception as e:
+            print(f"Error al consultar el índice {index_name}: {str(e)}")
+    
+    # Ordenar todos los documentos por puntuación de relevancia si existe
+    all_documents.sort(key=lambda x: x.metadata.get('score', 0), reverse=True)
+    
+    # Limitar al número total deseado
+    return all_documents[:top_k] if len(all_documents) > top_k else all_documents
+
 class MultiRetriever:
     """
     Retriever que puede consultar diferentes fuentes según el tema.
@@ -227,7 +291,7 @@ class MultiRetriever:
             if topic.strip() == "Renta":
                 # Usar Pinecone para consultas de Renta
                 print("MultiRetriever: Usando Pinecone para consultas de Renta")
-                docs = query_pinecone(query)
+                docs = query_renta(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Renta)")
                 return docs
             elif topic.strip() == "Timbre":
@@ -253,6 +317,12 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de IVA")
                 docs = query_iva(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (IVA)")
+                return docs
+            elif topic.strip() == "ICA":
+                # Usar Pinecone para consultas de ICA
+                print("MultiRetriever: Usando Pinecone para consultas de ICA")
+                docs = query_ica(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (ICA)")
                 return docs
             elif topic.strip() == "Impuesto al Consumo":
                 # Usar Pinecone para consultas de Impuesto al Consumo
