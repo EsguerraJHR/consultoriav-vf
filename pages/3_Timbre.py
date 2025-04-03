@@ -66,11 +66,7 @@ try:
                 # Función para reemplazar cada cita con su versión HTML que incluye la página
                 def reemplazar_cita(match):
                     num_cita = int(match.group(1))
-                    if num_cita in citas_dict:
-                        cita = citas_dict[num_cita]
-                        page = cita.get('page', None)
-                        if page and page != 0:
-                            return f'<sup>[{num_cita}, p.{page}]</sup>'
+                    # Simplificar: siempre devolver solo el número de cita sin la página
                     return f'<sup>[{num_cita}]</sup>'
                 
                 texto_formateado = re.sub(r'\[(\d+)\]', reemplazar_cita, texto)
@@ -92,6 +88,8 @@ try:
                         with st.expander("Ver fuentes utilizadas"):
                             for i, doc in enumerate(message["documents"]):
                                 source = doc.metadata.get('source', f'Documento {i+1}')
+                                # Eliminar las extensiones del nombre de la fuente
+                                source = source.replace('.pdf', '').replace('.html', '')
                                 st.markdown(f"**Fuente {i+1}:** `{source}`")
                                 st.markdown(f"```\n{doc.page_content}\n```")
                     
@@ -99,7 +97,10 @@ try:
                     if "citations" in message and message["citations"]:
                         with st.expander("Ver referencias"):
                             for i, citation in enumerate(message["citations"]):
-                                st.markdown(f"**[{i+1}]** `{citation['document_title']}`")
+                                # Eliminar las extensiones del título del documento
+                                document_title = citation['document_title']
+                                document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                st.markdown(f"**[{i+1}]** `{document_title}`")
                                 st.markdown(f"*\"{citation['cited_text']}\"*")
                     
                     # Si hay un flujo, mostrarlo
@@ -209,13 +210,18 @@ try:
                             if citations:
                                 with st.expander("Ver referencias"):
                                     for i, citation in enumerate(citations):
-                                        st.markdown(f"**[{i+1}]** `{citation['document_title']}`")
+                                        # Eliminar las extensiones del título del documento
+                                        document_title = citation['document_title']
+                                        document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                        st.markdown(f"**[{i+1}]** `{document_title}`")
                                         st.markdown(f"*\"{citation['cited_text']}\"*")
                             
                             # Mostrar las fuentes utilizadas
                             with st.expander("Ver fuentes utilizadas"):
                                 for i, doc in enumerate(documents):
                                     source = doc.metadata.get('source', f'Documento {i+1}')
+                                    # Eliminar las extensiones del nombre de la fuente
+                                    source = source.replace('.pdf', '').replace('.html', '')
                                     page = doc.metadata.get('page', None)
                                     page_info = f" (Pág. {page})" if page and page != 0 else ""
                                     st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")

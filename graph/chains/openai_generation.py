@@ -40,7 +40,7 @@ def generate_with_openai(question: str, documents: List[Document]) -> Dict[str, 
     # Formatear documentos para OpenAI
     formatted_docs = format_documents_for_openai(documents)
     
-    # Crear el sistema y el mensaje del usuario
+    # Crear el sistema y el mensaje del 
     system_message = """Eres un asistente jurídico experto especializado en derecho tributario colombiano. Tu objetivo es proporcionar respuestas precisas, detalladas y fundamentadas a consultas legales, siguiendo una estructura específica y con especial atención a cambios normativos y jurisprudenciales. Tus respuestas son DEFINITIVAS y no requieren consultas adicionales a otros profesionales.
 
 ESTRUCTURA DE LA RESPUESTA:
@@ -161,10 +161,65 @@ IMPORTANTE:
         
         print(f"Se extrajeron {len(citations)} citas del texto")
         
-        # Verificar si la respuesta ya incluye un punto 6 con citas
-        if "6. Citas" not in response_text and len(citations) > 0:
-            # Crear la sección de citas
+        # Verificar si hay una sección "6. Citas" existente y eliminarla para reemplazarla con nuestra versión
+        for citas_pattern in ["6. Citas", "6. Citas:", "6.Citas", "6.Citas:"]:
+            if citas_pattern in response_text and len(citations) > 0:
+                # Intentar varias formas de eliminar la sección existente
+                # Primero, dividir por el patrón para encontrar la sección
+                parts = response_text.split(citas_pattern, 1)
+                if len(parts) > 1:
+                    # La sección de citas existente podría terminar de varias formas
+                    citas_section = parts[1]
+                    # Buscar el final por un doble salto de línea
+                    end_of_citas = citas_section.find("\n\n")
+                    # O por el comienzo de una nueva sección numerada (7., 8., etc.)
+                    next_section_match = re.search(r'\n\d+\.', citas_section)
+                    next_section_pos = next_section_match.start() if next_section_match else -1
+                    
+                    # Determinar dónde termina la sección de citas
+                    if end_of_citas != -1 and (next_section_pos == -1 or end_of_citas < next_section_pos):
+                        # Termina con doble salto de línea
+                        response_text = parts[0] + citas_section[end_of_citas:]
+                    elif next_section_pos != -1:
+                        # Termina con nueva sección numerada
+                        response_text = parts[0] + citas_section[next_section_pos:]
+                    else:
+                        # Si no podemos determinar claramente dónde termina, intentar buscar el final por otro patrón
+                        # Buscar un patrón de citas como "6.1.", "6.2.", etc.
+                        citation_pattern = re.compile(r'6\.\d+\.')
+                        last_citation = None
+                        for m in citation_pattern.finditer(citas_section):
+                            last_citation = m
+                        
+                        if last_citation:
+                            # Buscar el final de la última cita
+                            start_pos = last_citation.start()
+                            end_line = citas_section[start_pos:].find("\n")
+                            if end_line != -1:
+                                # Eliminar todo hasta después de la última cita
+                                response_text = parts[0] + citas_section[start_pos + end_line:]
+                            else:
+                                # Si no podemos encontrar el final, simplemente quitar toda la sección
+                                response_text = parts[0]
+                        else:
+                            # Si no podemos encontrar ningún patrón de cita, quedarnos con la primera parte
+                            response_text = parts[0]
+                            
+        # También eliminar cualquier patrón que coincida con "6. Citas: 6.1. ..." al final del texto
+        final_citas_pattern = re.compile(r'6\.\s*Citas:?\s*6\.1\..*$', re.DOTALL)
+        response_text = re.sub(final_citas_pattern, '', response_text)
+        
+        # Ahora crear nuestra sección de citas mejorada
+        if len(citations) > 0:
+            # Crear la sección de citas con formato mejorado
             citas_section = "\n\n6. Citas\n\n"
+            
+            # Crear un cuadro con las citas utilizando HTML para mejor apariencia
+            # Streamlit soportará este HTML con unsafe_allow_html=True
+            citas_section += '<div style="background-color: #f0f2f6; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #4B61AB;">\n'
+            citas_section += '<ol style="margin: 0; padding-left: 20px;">\n'
+            
+            # Mostrar todas las citas sin filtrar duplicados
             for i, citation in enumerate(citations):
                 doc_title = citation["document_title"]
                 # Simplificar el título para mostrar solo el nombre del archivo
@@ -172,12 +227,41 @@ IMPORTANTE:
                     doc_title = doc_title.replace("Pinecone: pinecone_docs/", "")
                 elif "Pinecone: " in doc_title:
                     doc_title = doc_title.replace("Pinecone: ", "")
+                    
+                # Limpiar rutas largas en nombres de documentos
+                if "pinecone_timbre/data/timbre/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_timbre/data/timbre/", "")
+                elif "pinecone_renta/data/renta/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_renta/data/renta/", "")
+                elif "pinecone_iva/data/iva/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_iva/data/iva/", "")
+                elif "pinecone_retencion/data/retencion/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_retencion/data/retencion/", "")
+                elif "pinecone_ipoconsumo/data/ipoconsumo/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_ipoconsumo/data/ipoconsumo/", "")
+                elif "pinecone_aduanas/data/aduanas/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_aduanas/data/aduanas/", "")
+                elif "pinecone_cambiario/data/cambiario/" in doc_title:
+                    doc_title = doc_title.replace("pinecone_cambiario/data/cambiario/", "")
+                elif "data/timbre/" in doc_title:
+                    doc_title = doc_title.replace("data/timbre/", "")
+                elif "data/renta/" in doc_title:
+                    doc_title = doc_title.replace("data/renta/", "")
+                elif "data/iva/" in doc_title:
+                    doc_title = doc_title.replace("data/iva/", "")
                 
                 # Eliminar información de página para el listado
                 if " (Pág. " in doc_title:
                     doc_title = doc_title.split(" (Pág. ")[0]
                 
-                citas_section += f"   ○  6.{i+1}. {doc_title}.\n"
+                # Eliminar extensiones de archivo para mejorar la presentación
+                doc_title = doc_title.replace('.pdf', '').replace('.html', '')
+                
+                # Usar formato de lista numerada HTML con estilo mejorado
+                citas_section += f'<li style="margin-bottom: 5px;">{doc_title}</li>\n'
+            
+            citas_section += '</ol>\n'
+            citas_section += '</div>\n'
             
             # Verificar si hay una sección de "Conclusiones" o "Conclusión" en la respuesta
             if "CONCLUS" in response_text.upper():
@@ -246,6 +330,9 @@ def extract_citations_from_text(text, documents):
             if "pinecone_docs" in source:
                 # Formatear la fuente para que sea más clara
                 source = source.replace("pinecone_docs/", "Pinecone: ")
+            
+            # Eliminar extensiones de archivo para mejorar la presentación
+            source = source.replace('.pdf', '').replace('.html', '')
             
             citations.append({
                 "document_title": f"{source}{page_info}",

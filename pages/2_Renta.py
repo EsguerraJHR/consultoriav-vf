@@ -5,8 +5,10 @@ import time
 import re
 # Importar el grafo completo en lugar de solo los componentes individuales
 from graph.graph import app, set_debug
-from graph.chains.retrieval import query_pinecone
+from graph.chains.retrieval import query_renta
 from graph.chains.openai_generation import generate_with_openai
+# Importar el módulo de reranking
+from graph.chains.reranking import retrieve_with_reranking
 
 # Cargar variables de entorno
 load_dotenv()
@@ -31,7 +33,7 @@ La base de conocimiento incluye conceptos de la Dian sobre renta desde enero de 
 try:
     import pinecone
     pinecone_api_key = os.environ.get("PINECONE_API_KEY")
-    index_name = os.environ.get("PINECONE_INDEX_NAME", "ejhr")
+    index_name = "ejhr"  # Volviendo a usar el índice correcto ejhr
     
     if not pinecone_api_key:
         st.warning("No se ha configurado la API key de Pinecone. Por favor, configura la variable PINECONE_API_KEY en el archivo .env.")
@@ -56,7 +58,18 @@ try:
                     return texto
                 
                 # Reemplazar los corchetes de cita por etiquetas HTML para mejorar la visualización
-                texto_formateado = re.sub(r'\[(\d+)\]', r'<sup>[\1]</sup>', texto)
+                # Primero, crear un diccionario de citas para acceder rápidamente a la información de la página
+                citas_dict = {}
+                for i, cita in enumerate(citas):
+                    citas_dict[i+1] = cita
+                
+                # Función para reemplazar cada cita con su versión HTML que incluye la página
+                def reemplazar_cita(match):
+                    num_cita = int(match.group(1))
+                    # Simplificar: siempre devolver solo el número de cita sin la página
+                    return f'<sup>[{num_cita}]</sup>'
+                
+                texto_formateado = re.sub(r'\[(\d+)\]', reemplazar_cita, texto)
                 
                 return texto_formateado
             
@@ -75,14 +88,21 @@ try:
                         with st.expander("Ver fuentes utilizadas"):
                             for i, doc in enumerate(message["documents"]):
                                 source = doc.metadata.get('source', f'Documento {i+1}')
-                                st.markdown(f"**Fuente {i+1}:** `{source}`")
+                                # Eliminar las extensiones del nombre de la fuente
+                                source = source.replace('.pdf', '').replace('.html', '')
+                                page = doc.metadata.get('page', None)
+                                page_info = f" (Pág. {page})" if page and page != 0 else ""
+                                st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
                                 st.markdown(f"```\n{doc.page_content}\n```")
                     
                     # Si hay citas, mostrarlas
                     if "citations" in message and message["citations"]:
                         with st.expander("Ver referencias"):
                             for i, citation in enumerate(message["citations"]):
-                                st.markdown(f"**[{i+1}]** `{citation['document_title']}`")
+                                # Eliminar las extensiones del título del documento
+                                document_title = citation['document_title']
+                                document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                st.markdown(f"**[{i+1}]** `{document_title}`")
                                 st.markdown(f"*\"{citation['cited_text']}\"*")
                     
                     # Si hay un flujo, mostrarlo
@@ -131,12 +151,13 @@ try:
                     update_flow("🔍 Ejecutando flujo RAG avanzado...")
                     time.sleep(1)
                     
-                    # CAMBIO IMPORTANTE: Consultar directamente a Pinecone en lugar de usar el grafo
+                    # Consultar directamente a Pinecone para Renta
                     try:
-                        # Consultar directamente a Pinecone
-                        print("Renta.py: Consultando directamente a Pinecone")
-                        documents = query_pinecone(query)
-                        print(f"Renta.py: Recuperados {len(documents)} documentos de Pinecone")
+                        # Consultar directamente a Pinecone con reranking
+                        print("Renta.py: Consultando directamente a Pinecone (índice ejhr)")
+                        # Usar la función de reranking para mejorar la relevancia de los documentos
+                        documents = retrieve_with_reranking(query, query_renta, top_k=8)
+                        print(f"Renta.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
                         
                         # Verificar si se encontraron documentos
                         if not documents:
@@ -149,6 +170,9 @@ try:
                             documents = []
                         else:
                             update_flow(f"📝 Encontrados {len(documents)} documentos relevantes")
+                            time.sleep(0.5)
+                            
+                            update_flow("🔄 Aplicado reranking para mejorar la relevancia")
                             time.sleep(0.5)
                             
                             update_flow("✍️ Generando respuesta...")
@@ -188,14 +212,21 @@ try:
                             if citations:
                                 with st.expander("Ver referencias"):
                                     for i, citation in enumerate(citations):
-                                        st.markdown(f"**[{i+1}]** `{citation['document_title']}`")
+                                        # Eliminar las extensiones del título del documento
+                                        document_title = citation['document_title']
+                                        document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                        st.markdown(f"**[{i+1}]** `{document_title}`")
                                         st.markdown(f"*\"{citation['cited_text']}\"*")
                             
                             # Mostrar las fuentes utilizadas
                             with st.expander("Ver fuentes utilizadas"):
                                 for i, doc in enumerate(documents):
                                     source = doc.metadata.get('source', f'Documento {i+1}')
-                                    st.markdown(f"**Fuente {i+1}:** `{source}`")
+                                    # Eliminar las extensiones del nombre de la fuente
+                                    source = source.replace('.pdf', '').replace('.html', '')
+                                    page = doc.metadata.get('page', None)
+                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
+                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
                                     st.markdown(f"```\n{doc.page_content}\n```")
                             
                             # Mostrar el flujo de procesamiento
@@ -203,8 +234,8 @@ try:
                                 st.markdown(final_flow)
                     
                     except Exception as e:
-                        update_flow(f"❌ Error al consultar Pinecone o generar respuesta: {str(e)}")
-                        response = f"Lo siento, ocurrió un error: {str(e)}"
+                        update_flow(f"❌ Error: {str(e)}")
+                        response = f"Lo siento, ocurrió un error al procesar tu consulta: {str(e)}"
                         final_flow = '\n'.join(flow_steps)
                         flow_placeholder.empty()
                         st.markdown(response)
