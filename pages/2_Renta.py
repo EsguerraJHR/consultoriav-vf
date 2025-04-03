@@ -5,7 +5,32 @@ import time
 import re
 # Importar el grafo completo en lugar de solo los componentes individuales
 from graph.graph import app, set_debug
-from graph.chains.retrieval import query_renta
+# Crear una definición local de query_renta para evitar errores de importación
+try:
+    # Intentar importar primero
+    from graph.chains.retrieval import query_renta
+except ImportError:
+    # Si no existe, importar las funciones necesarias y crear una versión local
+    import sys
+    from graph.chains.retrieval import query_pinecone
+    
+    # Definir constantes necesarias si no existen
+    try:
+        from graph.chains.retrieval import RENTA_INDEX_NAME, RENTA_NAMESPACE, RENTA_TOP_K
+    except ImportError:
+        # Valores predeterminados basados en el análisis del código
+        RENTA_INDEX_NAME = "ejhr"
+        RENTA_NAMESPACE = "ejhr"
+        RENTA_TOP_K = 8
+    
+    # Crear una definición local de query_renta
+    def query_renta(query, top_k=RENTA_TOP_K):
+        """
+        Consulta específica para documentos de Renta (definida localmente).
+        """
+        print("Usando definición local de query_renta")
+        return query_pinecone(query, index_name=RENTA_INDEX_NAME, namespace=RENTA_NAMESPACE, top_k=top_k)
+
 from graph.chains.openai_generation import generate_with_openai
 # Importar el módulo de reranking
 from graph.chains.reranking import retrieve_with_reranking
