@@ -48,8 +48,7 @@ st.title("Consultas sobre Impuesto de Industria y Comercio (ICA)")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre el Impuesto de Industria y Comercio (ICA) en Colombia.
-La base de conocimiento incluye conceptos y normatividad sobre ICA a nivel nacional y de los principales municipios. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **172 sentencias del Consejo de Estado**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
 # Verificar si la colección existe
