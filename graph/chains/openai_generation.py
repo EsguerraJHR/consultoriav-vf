@@ -336,17 +336,39 @@ def extract_citations_from_text(text, documents):
             # Obtener el índice de origen si está disponible
             source_index = doc.metadata.get("source_index", "")
             
-            # Verificar si la fuente es de Pinecone
-            if "pinecone_docs" in source:
-                # Formatear la fuente para que sea más clara
-                source = source.replace("pinecone_docs/", "Pinecone: ")
+            # Limpiar los prefijos comunes de los diferentes índices
+            # Lista de prefijos a eliminar
+            prefixes_to_remove = [
+                "pinecone_docs/",
+                "Pinecone: ",
+                "pinecone_timbre/data/timbre/",
+                "pinecone_renta/data/renta/",
+                "pinecone_iva/data/iva/",
+                "pinecone_retencion/data/retencion/",
+                "pinecone_ipoconsumo/data/ipoconsumo/",
+                "pinecone_aduanas/data/aduanas/",
+                "pinecone_cambiario/data/cambiario/",
+                "pinecone_ica/data/ica/",
+                "data/timbre/",
+                "data/renta/",
+                "data/iva/",
+                "data/ica/",
+                "data/retencion/",
+                "data/ipoconsumo/",
+                "data/aduanas/",
+                "data/cambiario/"
+            ]
+            
+            # Eliminar los prefijos de la fuente
+            for prefix in prefixes_to_remove:
+                if prefix in source:
+                    source = source.replace(prefix, "")
+            
+            # Aplicar expresión regular general para cualquier otro prefijo de tipo data/XXX/
+            source = re.sub(r'(?:^|/)data/\w+/', '', source)
             
             # Eliminar extensiones de archivo para mejorar la presentación
             source = source.replace('.pdf', '').replace('.html', '')
-            
-            # Eliminar prefijos de tipo data/XXX/
-            if source.startswith("data/"):
-                source = re.sub(r'^data/\w+/', '', source)
             
             citations.append({
                 "document_title": f"{source}{page_info}",
@@ -397,6 +419,7 @@ INSTRUCCIONES PARA GENERAR RESPUESTAS:
 7. NUNCA incluyas secciones formales como "REFERENCIA", "CONTENIDO", "ENTENDIMIENTO", etc.
 8. Evita listas numeradas extensas; usa viñetas o párrafos cuando sea posible
 9. Mantén un tono útil pero profesional
+10. NO incluyas una sección de Citas al final de tu respuesta, esto se añadirá automáticamente
 
 Ejemplo:
 "El régimen de retención en la fuente para pagos al exterior establece una tarifa general del 20% [1]. Sin embargo, en el caso de servicios técnicos prestados desde el extranjero, la tarifa aplicable es del 15% según la última modificación del artículo 408 del Estatuto Tributario [2]. Es importante tener en cuenta que estos pagos también están sujetos al impuesto sobre las ventas cuando el servicio se entiende prestado en Colombia, conforme al artículo 420 del mismo estatuto [3]."
@@ -416,7 +439,8 @@ INSTRUCCIONES ADICIONALES:
 3. No estructures tu respuesta en secciones formales (no uses secciones como REFERENCIA, CONTENIDO, etc.)
 4. Organiza la información de manera lógica y fluida
 5. Presenta tanto aspectos favorables como desfavorables si corresponde
-6. Señala si hay contradicciones entre distintas fuentes o documentos"""
+6. Señala si hay contradicciones entre distintas fuentes o documentos
+7. NO incluyas una sección de citas al final, esto se añadirá automáticamente"""
     
     try:
         # Llamar a la API de OpenAI
@@ -437,10 +461,26 @@ INSTRUCCIONES ADICIONALES:
         
         print(f"Se extrajeron {len(citations)} citas del texto")
         
+        # Añadir sección de citas al final del texto
+        if len(citations) > 0:
+            # Añadir un encabezado para la sección de citas en formato más simple
+            response_text += "\n\n### Citas\n\n"
+            
+            # Usar un formato más simple para las citas (sin HTML complejo)
+            for i, citation in enumerate(citations):
+                doc_title = citation["document_title"]
+                # Mostrar el índice de origen si está disponible
+                source_index = citation.get("source_index", "")
+                index_info_str = f" [{source_index}]" if source_index else ""
+                response_text += f"{i+1}. {doc_title}{index_info_str}\n"
+        
+        # Almacenar las claves del índice para su uso en la respuesta
+        indices_used = list(index_info.keys()) if index_info else []
+        
         return {
             "text": response_text,
             "citations": citations,
-            "indices_used": list(index_info.keys()),
+            "indices_used": indices_used,
             "raw_message": response
         }
     

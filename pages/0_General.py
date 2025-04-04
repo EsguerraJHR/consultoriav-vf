@@ -231,31 +231,25 @@ try:
                         # Limpiar el placeholder
                         flow_placeholder.empty()
                         
-                        # Formatear la respuesta con citas si existen
-                        if citations:
-                            # Intentar formatear la respuesta, con manejo de errores
-                            try:
-                                formatted_response = formatear_texto_con_citas(response, citations)
-                                st.markdown(formatted_response, unsafe_allow_html=True)
-                            except Exception as format_err:
-                                print(f"Error al formatear las citas: {str(format_err)}")
-                                st.markdown(response)  # Mostrar sin formato en caso de error
+                        # Verificar si hay citas en la respuesta
+                        if "[1]" in response or response.find("\n\n### Citas\n\n") > -1:
+                            # Si hay citas, separarlas de la respuesta principal
+                            if "\n\n### Citas\n\n" in response:
+                                # Separar el texto principal de las citas
+                                main_response, citations_text = response.split("\n\n### Citas\n\n", 1)
+                                
+                                # Mostrar el texto principal
+                                st.write(main_response)
+                                
+                                # Mostrar las citas en un expander
+                                with st.expander("Referencias:", expanded=False):
+                                    st.write(f"### Citas\n\n{citations_text}")
+                            else:
+                                # Si no hay formato específico, mostrar toda la respuesta
+                                st.write(response)
                         else:
-                            st.markdown(response)
-                        
-                        # Mostrar las citas si existen en los expanders
-                        if citations:
-                            with st.expander("Ver referencias"):
-                                for i, citation in enumerate(citations):
-                                    # Eliminar las extensiones del título del documento
-                                    document_title = citation['document_title']
-                                    document_title = document_title.replace('.pdf', '').replace('.html', '')
-                                    # Mostrar el documento con su índice de origen
-                                    index_name = ""
-                                    if "source_index" in citation:
-                                        index_name = f" [{citation['source_index']}]"
-                                    st.markdown(f"**[{i+1}]** `{document_title}{index_name}`")
-                                    st.markdown(f"*\"{citation['cited_text']}\"*")
+                            # Si no hay citas, mostrar la respuesta completa
+                            st.write(response)
                         
                         # Mostrar las fuentes utilizadas
                         with st.expander("Ver fuentes utilizadas"):

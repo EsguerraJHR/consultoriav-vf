@@ -240,50 +240,40 @@ try:
                             # Limpiar el placeholder
                             flow_placeholder.empty()
                             
-                            # Formatear la respuesta con citas si existen
-                            if citations:
-                                # Intentar formatear la respuesta, con manejo de errores
-                                try:
-                                    formatted_response = formatear_texto_con_citas(response, citations)
-                                    st.markdown(formatted_response, unsafe_allow_html=True)
-                                except Exception as format_err:
-                                    print(f"Error al formatear las citas: {str(format_err)}")
-                                    st.markdown(response)  # Mostrar sin formato en caso de error
-                            else:
-                                st.markdown(response)
-                            
-                            # Mostrar las citas si existen en los expanders
-                            if citations:
-                                with st.expander("Ver referencias"):
-                                    for i, citation in enumerate(citations):
-                                        # Eliminar las extensiones del título del documento
-                                        document_title = citation['document_title']
-                                        document_title = document_title.replace('.pdf', '').replace('.html', '')
-                                        st.markdown(f"**[{i+1}]** `{document_title}`")
-                                        st.markdown(f"*\"{citation['cited_text']}\"*")
-                            
-                            # Mostrar las fuentes utilizadas
-                            with st.expander("Ver fuentes utilizadas"):
-                                for i, doc in enumerate(documents):
-                                    source = doc.metadata.get('source', f'Documento {i+1}')
-                                    # Eliminar las extensiones del nombre de la fuente
-                                    source = source.replace('.pdf', '').replace('.html', '')
-                                    # Limpiar prefijos comunes de la fuente
-                                    prefixes_to_remove = [
-                                        "pinecone_docs/", "Pinecone: ",
-                                        "pinecone_dur/data/dur/", "data/dur/",
-                                        "dur/"
-                                    ]
-                                    for prefix in prefixes_to_remove:
-                                        if prefix in source:
-                                            source = source.replace(prefix, "")
-                                    # Aplicar expresión regular general para cualquier otro prefijo de tipo data/XXX/
-                                    source = re.sub(r'(?:^|/)data/\w+/', '', source)
-                                    # Mostrar la página si está disponible
-                                    page = doc.metadata.get('page', None)
-                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
-                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
-                                    st.markdown(f"```\n{doc.page_content}\n```")
+                            # Procesar la respuesta
+                            try:
+                                # Verificar si hay citas en la respuesta
+                                if "[1]" in response or response.find("\n\n### Citas\n\n") > -1:
+                                    # Si hay citas, separarlas de la respuesta principal
+                                    if "\n\n### Citas\n\n" in response:
+                                        # Separar el texto principal de las citas
+                                        main_response, citations_text = response.split("\n\n### Citas\n\n", 1)
+                                        
+                                        # Mostrar el texto principal
+                                        st.write(main_response)
+                                        
+                                        # Mostrar las citas en un expander
+                                        with st.expander("Referencias:", expanded=False):
+                                            st.write(f"### Citas\n\n{citations_text}")
+                                    else:
+                                        # Si no hay formato específico, mostrar toda la respuesta
+                                        st.write(response)
+                                else:
+                                    # Si no hay citas, mostrar la respuesta completa
+                                    st.write(response)
+                            except Exception as e:
+                                print(f"Error al procesar la respuesta: {str(e)}")
+                                import traceback
+                                traceback.print_exc()
+                                
+                                error_message = f"Lo siento, ocurrió un error al procesar la respuesta: {str(e)}"
+                                st.error(error_message)
+                                
+                                # Guardar el error en el historial
+                                st.session_state.dur_messages.append({
+                                    "role": "assistant",
+                                    "content": error_message
+                                })
                         
                         # Guardar el mensaje en el historial
                         st.session_state.dur_messages.append({
