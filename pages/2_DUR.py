@@ -50,14 +50,6 @@ st.title("Consultas al Decreto Único Reglamentario (DUR)")
 # Descripción de la página
 st.markdown("""
 Esta sección le permite realizar consultas específicas sobre el **Decreto Único Reglamentario (DUR)** en materia tributaria.
-
-El asistente encontrará los artículos y disposiciones más relevantes del DUR 
-y presentará una respuesta concisa sin la estructura formal de las otras secciones.
-
-Ideal para:
-- Consultas sobre artículos específicos del DUR
-- Búsquedas sobre reglamentación tributaria
-- Entender la normativa reglamentaria vigente
 """)
 
 # Verificar si Pinecone está configurado
