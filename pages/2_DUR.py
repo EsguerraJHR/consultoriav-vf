@@ -6,7 +6,31 @@ import re
 # Importar el grafo completo en lugar de solo los componentes individuales
 from graph.graph import app, set_debug
 # Importar funciones específicas para consulta del DUR
-from graph.chains.retrieval import query_dur
+try:
+    # Intentar importar primero
+    from graph.chains.retrieval import query_dur
+except ImportError:
+    # Si no existe, importar las funciones necesarias y crear una versión local
+    import sys
+    from graph.chains.retrieval import query_pinecone
+    
+    # Definir constantes necesarias si no existen
+    try:
+        from graph.chains.retrieval import DUR_INDEX_NAME, DUR_NAMESPACE, DUR_TOP_K
+    except ImportError:
+        # Valores predeterminados basados en el análisis del código
+        DUR_INDEX_NAME = "dur"
+        DUR_NAMESPACE = "dur"
+        DUR_TOP_K = 10
+    
+    # Crear una definición local de query_dur
+    def query_dur(query, top_k=DUR_TOP_K):
+        """
+        Consulta específica para documentos del DUR (definida localmente).
+        """
+        print("Usando definición local de query_dur")
+        return query_pinecone(query, index_name=DUR_INDEX_NAME, namespace=DUR_NAMESPACE, top_k=top_k)
+
 from graph.chains.reranking import retrieve_with_reranking
 from graph.chains.openai_generation import generate_simple_response
 

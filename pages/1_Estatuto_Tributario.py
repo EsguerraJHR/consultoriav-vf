@@ -6,7 +6,31 @@ import re
 # Importar el grafo completo en lugar de solo los componentes individuales
 from graph.graph import app, set_debug
 # Importar funciones específicas para consulta del Estatuto Tributario
-from graph.chains.retrieval import query_estatuto
+try:
+    # Intentar importar primero
+    from graph.chains.retrieval import query_estatuto
+except ImportError:
+    # Si no existe, importar las funciones necesarias y crear una versión local
+    import sys
+    from graph.chains.retrieval import query_pinecone
+    
+    # Definir constantes necesarias si no existen
+    try:
+        from graph.chains.retrieval import ESTATUTO_INDEX_NAME, ESTATUTO_NAMESPACE, ESTATUTO_TOP_K
+    except ImportError:
+        # Valores predeterminados basados en el análisis del código
+        ESTATUTO_INDEX_NAME = "estatuto"
+        ESTATUTO_NAMESPACE = "estatuto"
+        ESTATUTO_TOP_K = 10
+    
+    # Crear una definición local de query_estatuto
+    def query_estatuto(query, top_k=ESTATUTO_TOP_K):
+        """
+        Consulta específica para documentos del Estatuto Tributario (definida localmente).
+        """
+        print("Usando definición local de query_estatuto")
+        return query_pinecone(query, index_name=ESTATUTO_INDEX_NAME, namespace=ESTATUTO_NAMESPACE, top_k=top_k)
+
 from graph.chains.reranking import retrieve_with_reranking
 from graph.chains.openai_generation import generate_simple_response
 
