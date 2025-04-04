@@ -25,7 +25,7 @@ st.title("Consultas sobre Retención en la Fuente")
 
 # Descripción de la página
 st.markdown("""
-Contiene 36 sentencias del Consejo de Estado y 343 conceptos de la Dian. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **36 sentencias del Consejo de Estado y 343 conceptos de la Dian**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """)
 
 # Verificar si la colección existe
