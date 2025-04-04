@@ -86,6 +86,21 @@ try:
                             source = doc.metadata.get('source', f'Documento {i+1}')
                             # Eliminar las extensiones del nombre de la fuente
                             source = source.replace('.pdf', '').replace('.html', '')
+                            # Limpiar prefijos comunes de la fuente
+                            prefixes_to_remove = [
+                                "pinecone_docs/", "Pinecone: ",
+                                "pinecone_timbre/data/timbre/", "pinecone_renta/data/renta/",
+                                "pinecone_iva/data/iva/", "pinecone_retencion/data/retencion/",
+                                "pinecone_ipoconsumo/data/ipoconsumo/", "pinecone_aduanas/data/aduanas/",
+                                "pinecone_cambiario/data/cambiario/", "pinecone_ica/data/ica/",
+                                "data/timbre/", "data/renta/", "data/iva/", "data/ica/",
+                                "data/retencion/", "data/ipoconsumo/", "data/aduanas/", "data/cambiario/"
+                            ]
+                            for prefix in prefixes_to_remove:
+                                if prefix in source:
+                                    source = source.replace(prefix, "")
+                            # Aplicar expresión regular general para cualquier otro prefijo de tipo data/XXX/
+                            source = re.sub(r'(?:^|/)data/\w+/', '', source)
                             # Mostrar el índice de origen si está disponible
                             index_name = doc.metadata.get('source_index', '')
                             index_info = f" [{index_name}]" if index_name else ""
@@ -101,7 +116,11 @@ try:
                             # Eliminar las extensiones del título del documento
                             document_title = citation['document_title']
                             document_title = document_title.replace('.pdf', '').replace('.html', '')
-                            st.markdown(f"**[{i+1}]** `{document_title}`")
+                            # Mostrar el documento con su índice de origen
+                            index_name = ""
+                            if "source_index" in citation:
+                                index_name = f" [{citation['source_index']}]"
+                            st.markdown(f"**[{i+1}]** `{document_title}{index_name}`")
                             st.markdown(f"*\"{citation['cited_text']}\"*")
                 
                 # Si hay información de índices utilizados, mostrarla
@@ -214,19 +233,28 @@ try:
                         
                         # Formatear la respuesta con citas si existen
                         if citations:
-                            formatted_response = formatear_texto_con_citas(response, citations)
-                            st.markdown(formatted_response, unsafe_allow_html=True)
+                            # Intentar formatear la respuesta, con manejo de errores
+                            try:
+                                formatted_response = formatear_texto_con_citas(response, citations)
+                                st.markdown(formatted_response, unsafe_allow_html=True)
+                            except Exception as format_err:
+                                print(f"Error al formatear las citas: {str(format_err)}")
+                                st.markdown(response)  # Mostrar sin formato en caso de error
                         else:
                             st.markdown(response)
                         
-                        # Mostrar las citas si existen
+                        # Mostrar las citas si existen en los expanders
                         if citations:
                             with st.expander("Ver referencias"):
                                 for i, citation in enumerate(citations):
                                     # Eliminar las extensiones del título del documento
                                     document_title = citation['document_title']
                                     document_title = document_title.replace('.pdf', '').replace('.html', '')
-                                    st.markdown(f"**[{i+1}]** `{document_title}`")
+                                    # Mostrar el documento con su índice de origen
+                                    index_name = ""
+                                    if "source_index" in citation:
+                                        index_name = f" [{citation['source_index']}]"
+                                    st.markdown(f"**[{i+1}]** `{document_title}{index_name}`")
                                     st.markdown(f"*\"{citation['cited_text']}\"*")
                         
                         # Mostrar las fuentes utilizadas
@@ -235,6 +263,21 @@ try:
                                 source = doc.metadata.get('source', f'Documento {i+1}')
                                 # Eliminar las extensiones del nombre de la fuente
                                 source = source.replace('.pdf', '').replace('.html', '')
+                                # Limpiar prefijos comunes de la fuente
+                                prefixes_to_remove = [
+                                    "pinecone_docs/", "Pinecone: ",
+                                    "pinecone_timbre/data/timbre/", "pinecone_renta/data/renta/",
+                                    "pinecone_iva/data/iva/", "pinecone_retencion/data/retencion/",
+                                    "pinecone_ipoconsumo/data/ipoconsumo/", "pinecone_aduanas/data/aduanas/",
+                                    "pinecone_cambiario/data/cambiario/", "pinecone_ica/data/ica/",
+                                    "data/timbre/", "data/renta/", "data/iva/", "data/ica/",
+                                    "data/retencion/", "data/ipoconsumo/", "data/aduanas/", "data/cambiario/"
+                                ]
+                                for prefix in prefixes_to_remove:
+                                    if prefix in source:
+                                        source = source.replace(prefix, "")
+                                # Aplicar expresión regular general para cualquier otro prefijo de tipo data/XXX/
+                                source = re.sub(r'(?:^|/)data/\w+/', '', source)
                                 # Mostrar el índice de origen si está disponible
                                 index_name = doc.metadata.get('source_index', '')
                                 index_info = f" [{index_name}]" if index_name else ""

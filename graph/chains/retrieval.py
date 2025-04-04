@@ -68,6 +68,16 @@ CAMBIARIO_INDEX_NAME = "cambiario"
 CAMBIARIO_NAMESPACE = "cambiario"
 CAMBIARIO_TOP_K = 8  # Valor específico para Cambiario
 
+# Configuración específica para Estatuto Tributario
+ESTATUTO_INDEX_NAME = "estatuto"
+ESTATUTO_NAMESPACE = "estatuto"
+ESTATUTO_TOP_K = 10  # Valor específico para Estatuto Tributario
+
+# Configuración específica para DUR
+DUR_INDEX_NAME = "dur"
+DUR_NAMESPACE = "dur"
+DUR_TOP_K = 10  # Valor específico para DUR
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -230,6 +240,18 @@ def query_cambiario(query: str, top_k: int = CAMBIARIO_TOP_K):
     """
     return query_pinecone(query, index_name=CAMBIARIO_INDEX_NAME, namespace=CAMBIARIO_NAMESPACE, top_k=top_k)
 
+def query_estatuto(query: str, top_k: int = ESTATUTO_TOP_K):
+    """
+    Consulta específica para documentos del Estatuto Tributario.
+    """
+    return query_pinecone(query, index_name=ESTATUTO_INDEX_NAME, namespace=ESTATUTO_NAMESPACE, top_k=top_k)
+
+def query_dur(query: str, top_k: int = DUR_TOP_K):
+    """
+    Consulta específica para documentos del DUR (Decreto Único Reglamentario).
+    """
+    return query_pinecone(query, index_name=DUR_INDEX_NAME, namespace=DUR_NAMESPACE, top_k=top_k)
+
 def query_all_indices(query: str, top_k: int = 10):
     """
     Consulta todos los índices disponibles y devuelve los documentos más relevantes.
@@ -246,7 +268,9 @@ def query_all_indices(query: str, top_k: int = 10):
         (query_ica, "ICA"),
         (query_ipoconsumo, "Impuesto al Consumo"),
         (query_aduanas, "Aduanas"),
-        (query_cambiario, "Cambiario")
+        (query_cambiario, "Cambiario"),
+        (query_estatuto, "Estatuto Tributario"),
+        (query_dur, "DUR")
     ]
     
     all_documents = []
@@ -341,6 +365,18 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de Cambiario")
                 docs = query_cambiario(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Cambiario)")
+                return docs
+            elif topic.strip() == "Estatuto Tributario":
+                # Usar Pinecone para consultas del Estatuto Tributario
+                print("MultiRetriever: Usando Pinecone para consultas del Estatuto Tributario")
+                docs = query_estatuto(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Estatuto Tributario)")
+                return docs
+            elif topic.strip() == "DUR":
+                # Usar Pinecone para consultas de DUR
+                print("MultiRetriever: Usando Pinecone para consultas de DUR")
+                docs = query_dur(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (DUR)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)

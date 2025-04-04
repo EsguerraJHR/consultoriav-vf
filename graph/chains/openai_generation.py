@@ -333,6 +333,9 @@ def extract_citations_from_text(text, documents):
             page = doc.metadata.get("page", None)
             page_info = f" (Pág. {page})" if page and page != 0 else ""
             
+            # Obtener el índice de origen si está disponible
+            source_index = doc.metadata.get("source_index", "")
+            
             # Verificar si la fuente es de Pinecone
             if "pinecone_docs" in source:
                 # Formatear la fuente para que sea más clara
@@ -349,7 +352,8 @@ def extract_citations_from_text(text, documents):
                 "document_title": f"{source}{page_info}",
                 "cited_text": excerpt,
                 "document_index": citation_num - 1,
-                "page": page
+                "page": page,
+                "source_index": source_index
             })
     
     return citations
