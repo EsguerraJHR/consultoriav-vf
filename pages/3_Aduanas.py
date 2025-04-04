@@ -25,7 +25,6 @@ st.title("Consultas sobre Aduanas y Comercio Exterior")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre Aduanas y Comercio Exterior en Colombia.
 Incluye **19 conceptos de la DIAN y 84 sentencias del Consejo de Estado**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
