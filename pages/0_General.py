@@ -310,53 +310,6 @@ try:
                 "citations": citations if 'citations' in locals() else [],
                 "indices_used": indices_used if 'indices_used' in locals() else []
             })
-            
-            # Forzar la visualización de todos los expanders relevantes
-            if 'documents' in locals() and documents:
-                with st.expander("Ver fuentes utilizadas", expanded=False):
-                    for i, doc in enumerate(documents):
-                        source = doc.metadata.get('source', f'Documento {i+1}')
-                        source = source.replace('.pdf', '').replace('.html', '')
-                        prefixes_to_remove = [
-                            "pinecone_docs/", "Pinecone: ",
-                            "pinecone_timbre/data/timbre/", "pinecone_renta/data/renta/",
-                            "pinecone_iva/data/iva/", "pinecone_retencion/data/retencion/",
-                            "pinecone_ipoconsumo/data/ipoconsumo/", "pinecone_aduanas/data/aduanas/",
-                            "pinecone_cambiario/data/cambiario/", "pinecone_ica/data/ica/",
-                            "data/timbre/", "data/renta/", "data/iva/", "data/ica/",
-                            "data/retencion/", "data/ipoconsumo/", "data/aduanas/", "data/cambiario/"
-                        ]
-                        for prefix in prefixes_to_remove:
-                            if prefix in source:
-                                source = source.replace(prefix, "")
-                        source = re.sub(r'(?:^|/)data/\w+/', '', source)
-                        index_name = doc.metadata.get('source_index', '')
-                        index_info = f" [{index_name}]" if index_name else ""
-                        page = doc.metadata.get('page', None)
-                        page_info = f" (Pág. {page})" if page and page != 0 else ""
-                        st.markdown(f"**Fuente {i+1}:** `{source}{index_info}{page_info}`")
-                        st.markdown(f"```\n{doc.page_content}\n```")
-            
-            if 'citations' in locals() and citations:
-                with st.expander("Ver referencias", expanded=False):
-                    for i, citation in enumerate(citations):
-                        document_title = citation['document_title']
-                        document_title = document_title.replace('.pdf', '').replace('.html', '')
-                        index_name = ""
-                        if "source_index" in citation:
-                            index_name = f" [{citation['source_index']}]"
-                        st.markdown(f"**[{i+1}]** `{document_title}{index_name}`")
-                        st.markdown(f"*\"{citation['cited_text']}\"*")
-            
-            if 'indices_used' in locals() and indices_used:
-                with st.expander("Índices consultados", expanded=False):
-                    st.markdown("##### Índices de donde proviene la información:")
-                    for index in indices_used:
-                        st.markdown(f"- {index}")
-            
-            if 'final_flow' in locals():
-                with st.expander("Ver flujo de procesamiento", expanded=False):
-                    st.markdown(final_flow)
 
 except Exception as e:
     st.error(f"Error al conectar con Pinecone: {str(e)}") 
