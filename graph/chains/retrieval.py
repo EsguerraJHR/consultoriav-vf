@@ -78,6 +78,21 @@ DUR_INDEX_NAME = "dur"
 DUR_NAMESPACE = "dur"
 DUR_TOP_K = 10  # Valor específico para DUR
 
+# Configuración específica para Análisis Ley 2277 de 2022
+ANALISIS_LEY_2277_INDEX_NAME = "analisisley2277de2022"
+ANALISIS_LEY_2277_NAMESPACE = "analisisley2277de2022"
+ANALISIS_LEY_2277_TOP_K = 10  # Valor específico para el libro
+
+# Configuración específica para Temas Clave
+TEMAS_CLAVE_INDEX_NAME = "temasclave"
+TEMAS_CLAVE_NAMESPACE = "temasclave"
+TEMAS_CLAVE_TOP_K = 10  # Valor específico para el libro
+
+# Configuración específica para Ley de Crecimiento
+LEY_CRECIMIENTO_INDEX_NAME = "leycrecimiento"
+LEY_CRECIMIENTO_NAMESPACE = "leycrecimiento"
+LEY_CRECIMIENTO_TOP_K = 10  # Valor específico para el libro
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -252,6 +267,24 @@ def query_dur(query: str, top_k: int = DUR_TOP_K):
     """
     return query_pinecone(query, index_name=DUR_INDEX_NAME, namespace=DUR_NAMESPACE, top_k=top_k)
 
+def query_analisis_ley_2277(query: str, top_k: int = ANALISIS_LEY_2277_TOP_K):
+    """
+    Consulta específica para documentos del libro Análisis de la reforma Tributaria - Ley 2277 de 2022.
+    """
+    return query_pinecone(query, index_name=ANALISIS_LEY_2277_INDEX_NAME, namespace=ANALISIS_LEY_2277_NAMESPACE, top_k=top_k)
+
+def query_temas_clave(query: str, top_k: int = TEMAS_CLAVE_TOP_K):
+    """
+    Consulta específica para documentos del libro Temas claves de la tributación colombiana.
+    """
+    return query_pinecone(query, index_name=TEMAS_CLAVE_INDEX_NAME, namespace=TEMAS_CLAVE_NAMESPACE, top_k=top_k)
+
+def query_ley_crecimiento(query: str, top_k: int = LEY_CRECIMIENTO_TOP_K):
+    """
+    Consulta específica para documentos del libro Análisis de la Ley de Crecimiento Económico.
+    """
+    return query_pinecone(query, index_name=LEY_CRECIMIENTO_INDEX_NAME, namespace=LEY_CRECIMIENTO_NAMESPACE, top_k=top_k)
+
 def query_all_indices(query: str, top_k: int = 10):
     """
     Consulta todos los índices disponibles y devuelve los documentos más relevantes.
@@ -270,7 +303,10 @@ def query_all_indices(query: str, top_k: int = 10):
         (query_aduanas, "Aduanas"),
         (query_cambiario, "Cambiario"),
         (query_estatuto, "Estatuto Tributario"),
-        (query_dur, "DUR")
+        (query_dur, "DUR"),
+        (query_analisis_ley_2277, "Análisis Ley 2277"),
+        (query_temas_clave, "Temas Clave"),
+        (query_ley_crecimiento, "Ley Crecimiento")
     ]
     
     all_documents = []
@@ -377,6 +413,24 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas de DUR")
                 docs = query_dur(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (DUR)")
+                return docs
+            elif topic.strip() == "Análisis Ley 2277":
+                # Usar Pinecone para consultas del libro Análisis Ley 2277
+                print("MultiRetriever: Usando Pinecone para consultas del libro Análisis Ley 2277")
+                docs = query_analisis_ley_2277(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Análisis Ley 2277)")
+                return docs
+            elif topic.strip() == "Temas Clave":
+                # Usar Pinecone para consultas del libro Temas Clave
+                print("MultiRetriever: Usando Pinecone para consultas del libro Temas Clave")
+                docs = query_temas_clave(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Temas Clave)")
+                return docs
+            elif topic.strip() == "Ley Crecimiento":
+                # Usar Pinecone para consultas del libro Ley de Crecimiento
+                print("MultiRetriever: Usando Pinecone para consultas del libro Ley de Crecimiento")
+                docs = query_ley_crecimiento(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Ley Crecimiento)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)

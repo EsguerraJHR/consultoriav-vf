@@ -25,8 +25,7 @@ st.title("Consultas sobre Régimen Cambiario")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre el Régimen Cambiario en Colombia.
-La base de conocimiento incluye conceptos de la Dian y el Banco de la República sobre Régimen Cambiario desde 2017 hasta 2024. Contiene 8 conceptos de la Dian sobre cambiario. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **12 conceptos de la Dian**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
 # Verificar si la colección existe

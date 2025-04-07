@@ -50,8 +50,7 @@ st.title("Consultas sobre Renta")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre el Impuesto de Renta en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre renta desde enero de 2017 hasta diciembre de 2024. Contiene 1702 conceptos de la Dian sobre renta. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **584 sentencias del Consejo de Estado y 1.657 conceptos de la Dian**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """)
 
 # Verificar si la colección existe

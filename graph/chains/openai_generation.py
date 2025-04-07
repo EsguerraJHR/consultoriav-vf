@@ -450,7 +450,7 @@ INSTRUCCIONES ADICIONALES:
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
             ],
-            temperature=0.3  # Temperatura un poco más alta para respuestas más naturales
+            temperature=0.2  # Temperatura un poco más alta para respuestas más naturales
         )
         
         # Extraer el texto de la respuesta

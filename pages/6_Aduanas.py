@@ -25,8 +25,7 @@ st.title("Consultas sobre Aduanas y Comercio Exterior")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre Aduanas y Comercio Exterior en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre Aduanas desde 2017 hasta 2024. Contiene 9 conceptos de la Dian sobre aduanas. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **84 sentencias del Consejo de Estado y19 conceptos de la Dian**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """, unsafe_allow_html=True)
 
 # Verificar si la colección existe

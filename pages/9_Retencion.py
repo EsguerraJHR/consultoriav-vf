@@ -25,8 +25,7 @@ st.title("Consultas sobre Retención en la Fuente")
 
 # Descripción de la página
 st.markdown("""
-Esta sección le permite realizar consultas específicas sobre Retención en la Fuente en Colombia.
-La base de conocimiento incluye conceptos de la Dian sobre retención desde enero de 2017 hasta diciembre de 2024. Contiene 200 conceptos de la Dian sobre retención. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
+Contiene **36 sentencias del Consejo de Estado y 343 conceptos de la Dian**. Pueden acceder a los documentos aquí [Biblioteca](https://eba-my.sharepoint.com/:f:/g/personal/hcastro_esguerrajhr_com/EgWozji9P89Gi02QG_0ybskBFzI39tnYkn78gfP3PiGWPw?e=JCZUDU).
 """)
 
 # Verificar si la colección existe
