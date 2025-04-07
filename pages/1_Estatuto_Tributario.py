@@ -97,7 +97,7 @@ try:
             # Mostrar mensajes anteriores
             for message in st.session_state.estatuto_messages:
                 with st.chat_message(message["role"]):
-                    # Si hay citas, mostrarlas
+                    # Si hay citas, formatear el texto con ellas
                     if message["role"] == "assistant" and "citations" in message and message["citations"]:
                         formatted_content = formatear_texto_con_citas(message["content"], message["citations"])
                         st.markdown(formatted_content, unsafe_allow_html=True)
@@ -276,7 +276,37 @@ try:
                             "flow": final_flow if 'final_flow' in locals() else ""
                         })
                         
-                        # Eliminar esta sección que está duplicando los expanders
+                        # Forzar la visualización de todos los expanders relevantes
+                        if 'citations' in locals() and citations:
+                            with st.expander("Ver referencias", expanded=False):
+                                for i, citation in enumerate(citations):
+                                    document_title = citation['document_title']
+                                    document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                    st.markdown(f"**[{i+1}]** `{document_title}`")
+                                    st.markdown(f"*\"{citation['cited_text']}\"*")
+                        
+                        if 'documents' in locals() and documents:
+                            with st.expander("Ver fuentes utilizadas", expanded=False):
+                                for i, doc in enumerate(documents):
+                                    source = doc.metadata.get('source', f'Documento {i+1}')
+                                    source = source.replace('.pdf', '').replace('.html', '')
+                                    prefixes_to_remove = [
+                                        "pinecone_docs/", "Pinecone: ",
+                                        "pinecone_estatuto/data/estatuto/", "data/estatuto/",
+                                        "estatuto/"
+                                    ]
+                                    for prefix in prefixes_to_remove:
+                                        if prefix in source:
+                                            source = source.replace(prefix, "")
+                                    source = re.sub(r'(?:^|/)data/\w+/', '', source)
+                                    page = doc.metadata.get('page', None)
+                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
+                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
+                                    st.markdown(f"```\n{doc.page_content}\n```")
+                        
+                        if 'final_flow' in locals():
+                            with st.expander("Ver flujo de procesamiento", expanded=False):
+                                st.markdown(final_flow)
                     
                     except Exception as e:
                         print(f"Error al procesar la consulta: {str(e)}")
