@@ -35,7 +35,14 @@ def format_documents_for_openai(documents: List[Document]) -> str:
 
 def generate_with_openai(question: str, documents: List[Document]) -> Dict[str, Any]:
     """
-    Genera una respuesta usando OpenAI GPT-4o-mini con citas numeradas.
+    Genera una respuesta detallada y estructurada usando OpenAI GPT-4o-2024-08-06 con citas numeradas.
+    
+    Args:
+        question: La pregunta del usuario
+        documents: Lista de documentos recuperados para responder a la pregunta
+        
+    Returns:
+        Dict con el texto generado, las citas extraídas y el mensaje completo de la API
     """
     # Formatear documentos para OpenAI
     formatted_docs = format_documents_for_openai(documents)
@@ -145,7 +152,7 @@ IMPORTANTE:
     try:
         # Llamar a la API de OpenAI
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o-2024-08-06",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}
@@ -445,7 +452,7 @@ INSTRUCCIONES ADICIONALES:
     try:
         # Llamar a la API de OpenAI
         response = client.chat.completions.create(
-            model="gpt-4o-mini",
+            model="gpt-4o-2024-08-06",
             messages=[
                 {"role": "system", "content": system_message},
                 {"role": "user", "content": user_message}

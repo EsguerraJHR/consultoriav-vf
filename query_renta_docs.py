@@ -116,7 +116,7 @@ IMPORTANTE:
     
     # Llamar a la API de OpenAI
     response = client.chat.completions.create(
-        model="gpt-4o-mini",
+        model="gpt-4o-2024-08-06",
         messages=[
             {"role": "system", "content": system_message},
             {"role": "user", "content": user_message}

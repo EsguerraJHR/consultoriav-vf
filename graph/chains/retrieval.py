@@ -93,6 +93,11 @@ LEY_CRECIMIENTO_INDEX_NAME = "leycrecimiento"
 LEY_CRECIMIENTO_NAMESPACE = "leycrecimiento"
 LEY_CRECIMIENTO_TOP_K = 10  # Valor específico para el libro
 
+# Configuración ICA GAITÁN
+ICA_GAITAN_INDEX_NAME = "icagaitan"
+ICA_GAITAN_NAMESPACE = "icagaitan"
+ICA_GAITAN_TOP_K = 10
+
 # Inicializar cliente de OpenAI
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -285,56 +290,60 @@ def query_ley_crecimiento(query: str, top_k: int = LEY_CRECIMIENTO_TOP_K):
     """
     return query_pinecone(query, index_name=LEY_CRECIMIENTO_INDEX_NAME, namespace=LEY_CRECIMIENTO_NAMESPACE, top_k=top_k)
 
+def query_ica_gaitan(query, top_k=ICA_GAITAN_TOP_K):
+    """
+    Consulta documentos de ICA GAITÁN.
+    """
+    print(f"Consultando índice ICA GAITÁN para: '{query}'")
+    return query_pinecone(query, index_name=ICA_GAITAN_INDEX_NAME, namespace=ICA_GAITAN_NAMESPACE, top_k=top_k)
+
 def query_all_indices(query: str, top_k: int = 10):
     """
-    Consulta todos los índices disponibles y devuelve los documentos más relevantes.
-    Ideal para una búsqueda general en toda la base de conocimiento.
+    Consulta todos los índices disponibles y combina los resultados.
     """
-    print(f"query_all_indices: Consultando todos los índices disponibles para: '{query}'")
-    
-    # Lista de funciones de consulta y sus nombres asociados
-    query_functions = [
-        (query_renta, "Renta"),
-        (query_timbre, "Timbre"),
-        (query_retencion, "Retención"),
-        (query_iva, "IVA"),
-        (query_ica, "ICA"),
-        (query_ipoconsumo, "Impuesto al Consumo"),
-        (query_aduanas, "Aduanas"),
-        (query_cambiario, "Cambiario"),
-        (query_estatuto, "Estatuto Tributario"),
-        (query_dur, "DUR"),
-        (query_analisis_ley_2277, "Análisis Ley 2277"),
-        (query_temas_clave, "Temas Clave"),
-        (query_ley_crecimiento, "Ley Crecimiento")
+    results = []
+    # Lista de funciones de consulta a ejecutar
+    functions_to_query = [
+        query_renta,
+        query_timbre,
+        query_retencion,
+        query_iva,
+        query_ica,
+        query_ipoconsumo,
+        query_aduanas,
+        query_cambiario,
+        query_estatuto,
+        query_dur,
+        query_analisis_ley_2277,
+        query_temas_clave,
+        query_ley_crecimiento,
+        query_ica_gaitan
     ]
     
-    all_documents = []
-    
     # Consultar cada índice y recopilar documentos
-    for query_func, index_name in query_functions:
+    for query_func in functions_to_query:
         try:
-            print(f"query_all_indices: Consultando índice {index_name}")
+            print(f"query_all_indices: Consultando índice {query_func.__name__}")
             # Obtener un número reducido de documentos de cada índice (proporcional al total deseado)
-            docs = query_func(query, top_k=top_k // len(query_functions) + 1)
+            docs = query_func(query, top_k=top_k // len(functions_to_query) + 1)
             
             if docs:
-                print(f"query_all_indices: Se encontraron {len(docs)} documentos en {index_name}")
+                print(f"query_all_indices: Se encontraron {len(docs)} documentos en {query_func.__name__}")
                 # Añadir información sobre la fuente para poder identificarlos después
                 for doc in docs:
                     if 'source_index' not in doc.metadata:
-                        doc.metadata['source_index'] = index_name
-                all_documents.extend(docs)
+                        doc.metadata['source_index'] = query_func.__name__
+                results.extend(docs)
             else:
-                print(f"query_all_indices: No se encontraron documentos en {index_name}")
+                print(f"query_all_indices: No se encontraron documentos en {query_func.__name__}")
         except Exception as e:
-            print(f"Error al consultar el índice {index_name}: {str(e)}")
+            print(f"Error al consultar el índice {query_func.__name__}: {str(e)}")
     
     # Ordenar todos los documentos por puntuación de relevancia si existe
-    all_documents.sort(key=lambda x: x.metadata.get('score', 0), reverse=True)
+    results.sort(key=lambda x: x.metadata.get('score', 0), reverse=True)
     
     # Limitar al número total deseado
-    return all_documents[:top_k] if len(all_documents) > top_k else all_documents
+    return results[:top_k] if len(results) > top_k else results
 
 class MultiRetriever:
     """
@@ -431,6 +440,12 @@ class MultiRetriever:
                 print("MultiRetriever: Usando Pinecone para consultas del libro Ley de Crecimiento")
                 docs = query_ley_crecimiento(query)
                 print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (Ley Crecimiento)")
+                return docs
+            elif topic.strip() == "ICA GAITÁN":
+                # Usar Pinecone para consultas de ICA GAITÁN
+                print("MultiRetriever: Usando Pinecone para consultas de ICA GAITÁN")
+                docs = query_ica_gaitan(query)
+                print(f"MultiRetriever: Recuperados {len(docs)} documentos de Pinecone (ICA GAITÁN)")
                 return docs
         
         # Usar Chroma para otros temas (por defecto IVA)

@@ -13,7 +13,7 @@ openai_api_key = os.getenv("OPENAI_API_KEY")
 if not openai_api_key:
     raise ValueError("No se encontró la clave API de OpenAI. Por favor, configúrela en las variables de entorno.")
 
-llm = ChatOpenAI(temperature=0, model="gpt-3.5-turbo", api_key=openai_api_key)
+llm = ChatOpenAI(temperature=0, model="gpt-4o-2024-08-06", api_key=openai_api_key)
 
 
 class GradeHallucinations(BaseModel):

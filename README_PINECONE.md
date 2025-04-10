@@ -137,7 +137,7 @@ Convierte los resultados de Pinecone en objetos Document con metadatos (fuente, 
 Este módulo mejora la calidad de los resultados mediante un reordenamiento semántico:
 Función rerank_documents:
 Toma la consulta original y los documentos recuperados
-Utiliza GPT-4o-mini para evaluar la relevancia de cada documento en relación con la consulta
+Utiliza GPT-4o-2024-08-06 para evaluar la relevancia de cada documento en relación con la consulta
 Asigna puntuaciones de 0 a 10 a cada documento, con justificaciones
 Ordena los documentos por relevancia (del más relevante al menos relevante)
 Devuelve solo los K documentos más relevantes
@@ -152,7 +152,7 @@ Función format_documents_for_openai:
 Formatea los documentos recuperados para incluirlos en el prompt a OpenAI
 Incluye la fuente de cada documento y su contenido para que el modelo pueda citarlos correctamente
 Función generate_with_openai:
-Utiliza GPT-4o-mini con un prompt extenso y detallado que:
+Utiliza GPT-4o-2024-08-06 con un prompt extenso y detallado que:
 Define el rol del asistente como experto jurídico en derecho tributario
 Especifica la estructura exacta que debe seguir la respuesta (Referencia, Contenido, Entendimiento, Conclusión, Análisis)
 Proporciona instrucciones sobre cómo citar los documentos usando el formato [n]
