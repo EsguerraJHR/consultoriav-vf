@@ -232,9 +232,39 @@ try:
                             # Limpiar el placeholder
                             flow_placeholder.empty()
                             
-                            # Mostrar la respuesta con formato HTML para las citas
-                            formatted_content = formatear_texto_con_citas(response, citations)
-                            st.markdown(formatted_content, unsafe_allow_html=True)
+                            # Procesar la respuesta
+                            try:
+                                # Verificar si hay citas en la respuesta
+                                if "[1]" in response or response.find("\n\n### Citas\n\n") > -1:
+                                    # Si hay citas, separarlas de la respuesta principal
+                                    if "\n\n### Citas\n\n" in response:
+                                        # Separar el texto principal de las citas
+                                        main_response, citations_text = response.split("\n\n### Citas\n\n", 1)
+                                        
+                                        # Mostrar el texto principal
+                                        st.write(main_response)
+                                        
+                                        # Mostrar las citas en un expander
+                                        with st.expander("Referencias:", expanded=False):
+                                            st.write(f"### Citas\n\n{citations_text}")
+                                    else:
+                                        # Si no hay formato específico, mostrar toda la respuesta con formato HTML para las citas
+                                        formatted_content = formatear_texto_con_citas(response, citations)
+                                        st.markdown(formatted_content, unsafe_allow_html=True)
+                                else:
+                                    # Si no hay citas, mostrar la respuesta completa
+                                    st.write(response)
+                            except Exception as e:
+                                print(f"Error al procesar la respuesta: {str(e)}")
+                                import traceback
+                                traceback.print_exc()
+                                
+                                error_message = f"Lo siento, ocurrió un error al procesar la respuesta: {str(e)}"
+                                st.error(error_message)
+                                
+                                # Mostrar la respuesta original con formato HTML para las citas
+                                formatted_content = formatear_texto_con_citas(response, citations)
+                                st.markdown(formatted_content, unsafe_allow_html=True)
                         
                         # Guardar el mensaje en el historial
                         st.session_state.icagaitan_messages.append({
@@ -244,6 +274,38 @@ try:
                             "documents": documents if 'documents' in locals() else [],
                             "flow": final_flow if 'final_flow' in locals() else ""
                         })
+                        
+                        # Forzar la visualización de todos los expanders relevantes
+                        if 'citations' in locals() and citations:
+                            with st.expander("Ver referencias", expanded=False):
+                                for i, citation in enumerate(citations):
+                                    document_title = citation['document_title']
+                                    document_title = document_title.replace('.pdf', '').replace('.html', '')
+                                    st.markdown(f"**[{i+1}]** `{document_title}`")
+                                    st.markdown(f"*\"{citation['cited_text']}\"*")
+                        
+                        if 'documents' in locals() and documents:
+                            with st.expander("Ver fuentes utilizadas", expanded=False):
+                                for i, doc in enumerate(documents):
+                                    source = doc.metadata.get('source', f'Documento {i+1}')
+                                    source = source.replace('.pdf', '').replace('.html', '')
+                                    prefixes_to_remove = [
+                                        "pinecone_docs/", "Pinecone: ",
+                                        f"pinecone_{index_name}/data/{index_name}/", f"data/{index_name}/",
+                                        f"{index_name}/"
+                                    ]
+                                    for prefix in prefixes_to_remove:
+                                        if prefix in source:
+                                            source = source.replace(prefix, "")
+                                    source = re.sub(r'(?:^|/)data/\w+/', '', source)
+                                    page = doc.metadata.get('page', None)
+                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
+                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
+                                    st.markdown(f"```\n{doc.page_content}\n```")
+                        
+                        if 'final_flow' in locals():
+                            with st.expander("Ver flujo de procesamiento", expanded=False):
+                                st.markdown(final_flow)
                     
                     except Exception as e:
                         print(f"Error al procesar la consulta: {str(e)}")
