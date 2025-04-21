@@ -25,8 +25,8 @@ EMBEDDING_MODEL = "text-embedding-3-large"
 TOP_K = 5  # Número de resultados a recuperar
 
 # Configuración específica para Renta
-RENTA_INDEX_NAME = "ejhr"
-RENTA_NAMESPACE = "ejhr"
+RENTA_INDEX_NAME = "renta"
+RENTA_NAMESPACE = "renta"
 RENTA_TOP_K = 8  # Valor específico para Renta
 
 # Configuración específica para Timbre
