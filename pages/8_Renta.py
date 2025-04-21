@@ -19,8 +19,8 @@ except ImportError:
         from graph.chains.retrieval import RENTA_INDEX_NAME, RENTA_NAMESPACE, RENTA_TOP_K
     except ImportError:
         # Valores predeterminados basados en el análisis del código
-        RENTA_INDEX_NAME = "ejhr"
-        RENTA_NAMESPACE = "ejhr"
+        RENTA_INDEX_NAME = "renta"
+        RENTA_NAMESPACE = "renta"
         RENTA_TOP_K = 8
     
     # Crear una definición local de query_renta
@@ -57,7 +57,7 @@ Contiene **584 sentencias del Consejo de Estado y 1.657 conceptos de la Dian**. 
 try:
     import pinecone
     pinecone_api_key = os.environ.get("PINECONE_API_KEY")
-    index_name = "ejhr"  # Volviendo a usar el índice correcto ejhr
+    index_name = "renta"  # Volviendo a usar el índice correcto renta
     
     if not pinecone_api_key:
         st.warning("No se ha configurado la API key de Pinecone. Por favor, configura la variable PINECONE_API_KEY en el archivo .env.")
@@ -178,7 +178,7 @@ try:
                     # Consultar directamente a Pinecone para Renta
                     try:
                         # Consultar directamente a Pinecone con reranking
-                        print("Renta.py: Consultando directamente a Pinecone (índice ejhr)")
+                        print("Renta.py: Consultando directamente a Pinecone (índice renta)")
                         # Usar la función de reranking para mejorar la relevancia de los documentos
                         documents = retrieve_with_reranking(query, query_renta, top_k=8)
                         print(f"Renta.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
