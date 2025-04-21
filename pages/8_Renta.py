@@ -179,8 +179,8 @@ try:
                     try:
                         # Consultar directamente a Pinecone con reranking
                         print("Renta.py: Consultando directamente a Pinecone (índice renta)")
-                        # Usar la función de reranking para mejorar la relevancia de los documentos
-                        documents = retrieve_with_reranking(query, query_renta, top_k=8)
+                        # Usar la función de reranking para mejorar la relevancia de los documentos y aumentar top_k
+                        documents = retrieve_with_reranking(query, query_renta, top_k=12)
                         print(f"Renta.py: Recuperados {len(documents)} documentos de Pinecone con reranking")
                         
                         # Verificar si se encontraron documentos
