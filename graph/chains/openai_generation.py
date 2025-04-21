@@ -125,6 +125,7 @@ INSTRUCCIONES ESPECIALES:
 8. Evita frases como "se recomienda buscar asesoría profesional" o similares. En su lugar, proporciona directrices claras y definitivas.
 9. Cuando existan diferentes interpretaciones, toma una posición clara basada en la normativa y jurisprudencia más reciente.
 10. Proporciona análisis extenso y detallado en cada sección, evitando respuestas superficiales o meramente enunciativas.
+11. Dentro de las subsecciones del ANÁLISIS (5.1 a 5.5), prefiere desarrollar los puntos usando párrafos de prosa en lugar de listas con viñetas, manteniendo la profundidad requerida y asegurando que cada elemento solicitado sea abordado.
 
 Ejemplo de formato correcto:
 "La tarifa general del IVA en Colombia es del 19% [1]. Sin embargo, es importante notar que el Consejo de Estado, en sentencia reciente, ha modificado la interpretación de su base gravable en ciertos casos [2], contradiciendo la postura tradicional de la DIAN [3]. Esta modificación implica que ahora los contribuyentes deben calcular la base gravable considerando los siguientes elementos específicos: primero, ... segundo, ... tercero, ... Esta nueva interpretación tiene un impacto significativo en sectores como el de servicios, donde anteriormente..."
@@ -147,7 +148,7 @@ IMPORTANTE:
 8. Mantén una numeración clara (1., 2., 3., etc. para secciones principales y 5.1., 5.2., etc. para subsecciones del análisis).
 9. NUNCA sugieras consultar a un asesor tributario, abogado u otro profesional externo. Tus respuestas deben ser DEFINITIVAS.
 10. Proporciona directrices claras y específicas en lugar de recomendaciones generales.
-11. IMPORTANTE: Al final de tu respuesta, añade un punto 6 llamado "Citas" donde listes todas las referencias utilizadas."""
+11. IMPORTANTE: Al final de tu respuesta, añade un punto 6 llamado "Citas" donde listes todas las referencias utilizadas CON NUMERACIÓN SIMPLE (1., 2., 3., etc.)."""
     
     try:
         # Llamar a la API de OpenAI
@@ -166,7 +167,7 @@ IMPORTANTE:
         # Extraer citas del texto usando el patrón [1], [2], etc.
         citations = extract_citations_from_text(response_text, documents)
         
-        print(f"Se extrajeron {len(citations)} citas del texto")
+        print(f"Se extrajeron {len(citations)} citas únicas del texto")
         
         # Verificar si hay una sección "6. Citas" existente y eliminarla para reemplazarla con nuestra versión
         for citas_pattern in ["6. Citas", "6. Citas:", "6.Citas", "6.Citas:"]:
@@ -218,84 +219,19 @@ IMPORTANTE:
         
         # Ahora crear nuestra sección de citas mejorada
         if len(citations) > 0:
-            # Crear la sección de citas con formato mejorado
+            # Crear la sección de citas con formato de texto simple
             citas_section = "\n\n6. Citas\n\n"
             
-            # Crear un cuadro con las citas utilizando HTML para mejor apariencia
-            # Streamlit soportará este HTML con unsafe_allow_html=True
-            citas_section += '<div style="background-color: #f0f2f6; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #4B61AB;">\n'
-            citas_section += '<ol style="margin: 0; padding-left: 20px;">\n'
-            
-            # Mostrar todas las citas sin filtrar duplicados
+            # Usar los títulos extraídos por extract_citations_from_text (que ahora son nombre_sentencia)
             for i, citation in enumerate(citations):
-                doc_title = citation["document_title"]
-                # Simplificar el título para mostrar solo el nombre del archivo
-                if "Pinecone: pinecone_docs/" in doc_title:
-                    doc_title = doc_title.replace("Pinecone: pinecone_docs/", "")
-                elif "Pinecone: " in doc_title:
-                    doc_title = doc_title.replace("Pinecone: ", "")
-                    
-                # Limpiar rutas largas en nombres de documentos
-                if "pinecone_timbre/data/timbre/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_timbre/data/timbre/", "")
-                elif "pinecone_renta/data/renta/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_renta/data/renta/", "")
-                elif "pinecone_iva/data/iva/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_iva/data/iva/", "")
-                elif "pinecone_retencion/data/retencion/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_retencion/data/retencion/", "")
-                elif "pinecone_ipoconsumo/data/ipoconsumo/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_ipoconsumo/data/ipoconsumo/", "")
-                elif "pinecone_aduanas/data/aduanas/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_aduanas/data/aduanas/", "")
-                elif "pinecone_cambiario/data/cambiario/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_cambiario/data/cambiario/", "")
-                elif "pinecone_ica/data/ica/" in doc_title:
-                    doc_title = doc_title.replace("pinecone_ica/data/ica/", "")
-                elif "data/timbre/" in doc_title:
-                    doc_title = doc_title.replace("data/timbre/", "")
-                elif "data/renta/" in doc_title:
-                    doc_title = doc_title.replace("data/renta/", "")
-                elif "data/iva/" in doc_title:
-                    doc_title = doc_title.replace("data/iva/", "")
-                elif "data/ica/" in doc_title:
-                    doc_title = doc_title.replace("data/ica/", "")
-                # Eliminación general de prefijos de tipo "data/XXX/"
-                else:
-                    doc_title = re.sub(r'data/\w+/', '', doc_title)
-                
-                # Eliminar información de página para el listado
-                if " (Pág. " in doc_title:
-                    doc_title = doc_title.split(" (Pág. ")[0]
-                
-                # Eliminar extensiones de archivo para mejorar la presentación
-                doc_title = doc_title.replace('.pdf', '').replace('.html', '')
-                
-                # Usar formato de lista numerada HTML con estilo mejorado
-                citas_section += f'<li style="margin-bottom: 5px;">{doc_title}</li>\n'
+                 # El título ya viene limpio (nombre_sentencia) desde extract_citations_from_text
+                doc_title = citation["document_title"] 
+                citas_section += f"{i+1}. {doc_title}.\n"
             
-            citas_section += '</ol>\n'
-            citas_section += '</div>\n'
-            
-            # Verificar si hay una sección de "Conclusiones" o "Conclusión" en la respuesta
-            if "CONCLUS" in response_text.upper():
-                # Insertar la sección de citas después de la sección de análisis
-                parts = response_text.split("5. ANÁLISIS", 1)
-                if len(parts) > 1:
-                    # Buscar el final de la sección de análisis
-                    analysis_section = parts[1]
-                    # Buscar dónde termina el análisis (puede ser con una línea en blanco o el final del texto)
-                    end_of_analysis = analysis_section.rfind("\n\n")
-                    if end_of_analysis != -1:
-                        response_text = parts[0] + "5. ANÁLISIS" + analysis_section[:end_of_analysis] + citas_section + analysis_section[end_of_analysis:]
-                    else:
-                        response_text = response_text + citas_section
-                else:
-                    # Si no encontramos la sección de análisis, añadimos al final
-                    response_text = response_text + citas_section
-            else:
-                # Si no hay una estructura clara, añadir al final
-                response_text = response_text + citas_section
+            # Añadir la sección de citas al final de la respuesta generada
+            # (Esto podría duplicarse si el LLM ya generó la sección 6, pero es más simple 
+            # y asegura que nuestra versión formateada esté presente)
+            response_text += citas_section 
         
         return {
             "text": response_text,
@@ -315,75 +251,59 @@ IMPORTANTE:
 def extract_citations_from_text(text, documents):
     """
     Extrae citas manuales del texto en formato [1], [2], etc.
+    Devuelve una lista de diccionarios de citas únicas, usando 'nombre_sentencia' como título.
     """
     citations = []
-    # Buscar patrones de cita como [1], [2], etc.
+    # Usar un diccionario para asegurar unicidad y orden por índice
+    unique_citations = {}
     citation_pattern = r'\[(\d+)\]'
     matches = re.finditer(citation_pattern, text)
     
-    citation_indices = set()  # Para evitar duplicados
-    
     for match in matches:
-        citation_num = int(match.group(1))
-        if citation_num <= len(documents) and citation_num not in citation_indices:
-            citation_indices.add(citation_num)
-            doc = documents[citation_num - 1]
+        try:
+            citation_num = int(match.group(1))
+            doc_index = citation_num - 1 # Índice basado en 0
+
+            # Asegurarse que el índice es válido y no hemos procesado ya esta cita
+            if 0 <= doc_index < len(documents) and citation_num not in unique_citations:
+                doc = documents[doc_index]
+                
+                # --- Usar 'nombre_sentencia' como título --- 
+                nombre_sentencia = doc.metadata.get("nombre_sentencia", None)
+                # Si no hay nombre_sentencia, usar el source como fallback
+                if not nombre_sentencia:
+                    source = doc.metadata.get("source", f"Documento Desconocido {citation_num}")
+                    # Limpiar el source si es necesario (ej. quitar prefijos)
+                    if "pinecone_docs/data/" in source:
+                         source = source.split("pinecone_docs/data/")[-1]
+                    if ".md" in source:
+                         source = source.split(".md")[0]
+                    document_title = source # Usar source limpio como fallback
+                else:
+                    document_title = nombre_sentencia # Usar nombre_sentencia
+
+                # Extraer un fragmento del contenido como referencia
+                content = doc.page_content
+                excerpt = content[:200] + "..." if len(content) > 200 else content
+                
+                # Guardar la cita única
+                unique_citations[citation_num] = {
+                    "document_title": document_title,
+                    "cited_text": excerpt, # Texto citado para referencia (opcional mostrarlo)
+                    "document_index": doc_index,
+                    # Añadir source original por si se necesita
+                    "original_source": doc.metadata.get("source", "Desconocido") 
+                }
+        except ValueError:
+            # Ignorar si el número en corchetes no es un entero válido
+            continue
+        except IndexError:
+            # Ignorar si el índice de la cita está fuera de rango
+             print(f"Advertencia: Índice de cita [{citation_num}] fuera de rango para {len(documents)} documentos.")
+             continue
             
-            # Extraer un fragmento más significativo del documento
-            content = doc.page_content
-            excerpt = content[:200] + "..." if len(content) > 200 else content
-            
-            # Obtener la fuente del documento
-            source = doc.metadata.get("source", f"Documento {citation_num}")
-            
-            # Obtener la página del documento si está disponible
-            page = doc.metadata.get("page", None)
-            page_info = f" (Pág. {page})" if page and page != 0 else ""
-            
-            # Obtener el índice de origen si está disponible
-            source_index = doc.metadata.get("source_index", "")
-            
-            # Limpiar los prefijos comunes de los diferentes índices
-            # Lista de prefijos a eliminar
-            prefixes_to_remove = [
-                "pinecone_docs/",
-                "Pinecone: ",
-                "pinecone_timbre/data/timbre/",
-                "pinecone_renta/data/renta/",
-                "pinecone_iva/data/iva/",
-                "pinecone_retencion/data/retencion/",
-                "pinecone_ipoconsumo/data/ipoconsumo/",
-                "pinecone_aduanas/data/aduanas/",
-                "pinecone_cambiario/data/cambiario/",
-                "pinecone_ica/data/ica/",
-                "data/timbre/",
-                "data/renta/",
-                "data/iva/",
-                "data/ica/",
-                "data/retencion/",
-                "data/ipoconsumo/",
-                "data/aduanas/",
-                "data/cambiario/"
-            ]
-            
-            # Eliminar los prefijos de la fuente
-            for prefix in prefixes_to_remove:
-                if prefix in source:
-                    source = source.replace(prefix, "")
-            
-            # Aplicar expresión regular general para cualquier otro prefijo de tipo data/XXX/
-            source = re.sub(r'(?:^|/)data/\w+/', '', source)
-            
-            # Eliminar extensiones de archivo para mejorar la presentación
-            source = source.replace('.pdf', '').replace('.html', '')
-            
-            citations.append({
-                "document_title": f"{source}{page_info}",
-                "cited_text": excerpt,
-                "document_index": citation_num - 1,
-                "page": page,
-                "source_index": source_index
-            })
+    # Convertir el diccionario de citas únicas a una lista ordenada por número de cita
+    citations = [unique_citations[key] for key in sorted(unique_citations.keys())]
     
     return citations
 
@@ -466,7 +386,7 @@ INSTRUCCIONES ADICIONALES:
         # Extraer citas del texto usando el patrón [1], [2], etc.
         citations = extract_citations_from_text(response_text, documents)
         
-        print(f"Se extrajeron {len(citations)} citas del texto")
+        print(f"Se extrajeron {len(citations)} citas únicas del texto")
         
         # Añadir sección de citas al final del texto
         if len(citations) > 0:
