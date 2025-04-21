@@ -126,6 +126,7 @@ INSTRUCCIONES ESPECIALES:
 9. Cuando existan diferentes interpretaciones, toma una posición clara basada en la normativa y jurisprudencia más reciente.
 10. Proporciona análisis extenso y detallado en cada sección, evitando respuestas superficiales o meramente enunciativas.
 11. Dentro de las subsecciones del ANÁLISIS (5.1 a 5.5), prefiere desarrollar los puntos usando párrafos de prosa en lugar de listas con viñetas, manteniendo la profundidad requerida y asegurando que cada elemento solicitado sea abordado.
+12. RECUERDA: La prioridad absoluta es la profundidad y el detalle exhaustivo en el ANÁLISIS. No te limites a listar puntos; explica los argumentos jurídicos, compara las fuentes proporcionadas, detalla las implicaciones prácticas con ejemplos concretos y cita [n] cada afirmación relevante.
 
 Ejemplo de formato correcto:
 "La tarifa general del IVA en Colombia es del 19% [1]. Sin embargo, es importante notar que el Consejo de Estado, en sentencia reciente, ha modificado la interpretación de su base gravable en ciertos casos [2], contradiciendo la postura tradicional de la DIAN [3]. Esta modificación implica que ahora los contribuyentes deben calcular la base gravable considerando los siguientes elementos específicos: primero, ... segundo, ... tercero, ... Esta nueva interpretación tiene un impacto significativo en sectores como el de servicios, donde anteriormente..."
