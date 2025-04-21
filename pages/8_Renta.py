@@ -232,33 +232,12 @@ try:
                             else:
                                 st.markdown(response)
                             
-                            # Mostrar las citas si existen
-                            if citations:
-                                with st.expander("Ver referencias"):
-                                    for i, citation in enumerate(citations):
-                                        # Eliminar las extensiones del título del documento
-                                        document_title = citation['document_title']
-                                        document_title = document_title.replace('.pdf', '').replace('.html', '')
-                                        st.markdown(f"**[{i+1}]** `{document_title}`")
-                                        st.markdown(f"*\"{citation['cited_text']}\"*")
-                            
-                            # Mostrar las fuentes utilizadas
-                            with st.expander("Ver fuentes utilizadas"):
-                                for i, doc in enumerate(documents):
-                                    source = doc.metadata.get('source', f'Documento {i+1}')
-                                    # Eliminar las extensiones del nombre de la fuente
-                                    source = source.replace('.pdf', '').replace('.html', '')
-                                    page = doc.metadata.get('page', None)
-                                    page_info = f" (Pág. {page})" if page and page != 0 else ""
-                                    st.markdown(f"**Fuente {i+1}:** `{source}{page_info}`")
-                                    st.markdown(f"```\n{doc.page_content}\n```")
-                            
                             # Mostrar el flujo de procesamiento
                             with st.expander("Ver flujo de procesamiento"):
                                 st.markdown(final_flow)
                     
                     except Exception as e:
-                        update_flow(f"❌ Error: {str(e)}")
+                        update_flow(f"❌ Error durante el procesamiento: {e}")
                         response = f"Lo siento, ocurrió un error al procesar tu consulta: {str(e)}"
                         final_flow = '\n'.join(flow_steps)
                         flow_placeholder.empty()
